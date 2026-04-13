@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TreeFlow</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .container { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
+        .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; overflow: hidden; }
+        .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
+        .jaquette-container { width: 50%; aspect-ratio: 1/1; margin: 10px auto; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; background-position: center; border: 2px solid #bc13fe; cursor: pointer; position: relative; z-index: 1; }
+        #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
+        #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
+        #current-artist-album { font-size: 14px; margin: 0; color: #bc13fe; transition: opacity 0.5s; }
+        .fade-out { opacity: 0; }
+        .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
+        #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: background 0.2s; }
+        #play-pause-btn:hover { background: #d05eff; }
+        #play-pause-btn svg { width: 22px; height: 22px; fill: white; }
+        #icon-pause { display: none; }
+        #progress-bar { flex-grow: 1; accent-color: #bc13fe; cursor: pointer; }
+        .track-list { width: 95%; margin: 10px auto; padding-bottom: 20px; }
+        .track { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .track-info-text { cursor: pointer; flex-grow: 1; }
+        .track h3 { margin: 0 0 5px 0; font-size: 16px; }
+        .track p { margin: 0; font-size: 12px; color: #bc13fe; }
+        .download-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .download-btn svg { width: 24px; height: 24px; fill: #bc13fe; }
+        #lyrics-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
+        #lyrics-content { font-size: 16px; line-height: 1.8; margin-top: 40px; white-space: pre-line; color: #ddd; }
+        .close-lyrics { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; color: #bc13fe; }
+    </style>
+</head>
+<body>
+    <div id="lyrics-overlay">
+        <span class="close-lyrics" onclick="toggleLyrics()">×</span>
+        <h2 id="lyrics-title" style="color: #bc13fe;">Paroles</h2>
+        <div id="lyrics-content"></div>
+    </div>
+    <div class="container">
+        <div class="header-sticky">
+            <div class="header-sticky-blur"></div>
+            <div class="jaquette-container" onclick="toggleLyrics()"></div>
+            <div id="track-info">
+                <h2 id="current-title">TreeFlow</h2>
+                <p id="current-artist-album">Hanaé</p>
+            </div>
+            <div class="controls-container">
+                <button id="play-pause-btn" onclick="togglePlay()">
+                    <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <input type="range" id="progress-bar" value="0" max="100">
+            </div>
+            <audio id="audio-element"></audio>
+        </div>
+        <div class="track-list" id="track-list"></div>
+    </div>
+    <script>
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        // (Copie ici tout ton script JavaScript de la version 1.5)
+    </script>
+</body>
+</html>
