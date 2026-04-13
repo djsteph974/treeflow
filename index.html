@@ -60,7 +60,50 @@
     </div>
     <script>
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-        // (Copie ici tout ton script JavaScript de la version 1.5)
+        const playlist = [
+            { title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "J't'ai fait une chanson,\nune belle chanson\nMaman\nJ'ai gratté les cordes au médiator\nMaman\nSur ma guitare, j'y ai mis du cœur\nMaman\nPour que ça résonne, à toute heure\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nJ'ai joué du piano et du xylo\nMaman\nSorti mon stylo et mon micro\nMaman\nJ'ai mis mon casque sur les oreilles\nMaman\nJ'ai mis le paquet dans ma belle voix\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nGravé dans le noir, sur ce grand disque\nMaman\nPour toi je chante, je prends le risque\nMaman\nPose le diamant et écoute ma voix\nMaman\nC'est notre chanson, juste pour toi\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nDans cette pochette noire,\nun beau vinyle\nC'est pour toi maman" },
+            { title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "J't'ai fait un dessin, un beau dessin\nMaman je t'aime\nPlein de petites fleurs et de p'tits cœurs\nMaman je t'aime\nJ'ai fait un mouton tout blanc, tout rond\nMaman je t'aime\nAvec des p'tits yeux\ntout ronds, tout bleus\nMaman je t'aime\nMaman, maman, maman, maman\n\nY a des papillons tout en couleurs\nMaman je t'aime\nY a des papillons sur chaque fleur\nMaman je t'aime\nJ'en ai mis tout plein dans mon dessin\nMaman je t'aime\nEt en majuscules\ndans une grosse bulle\nMaman je t'aime\nMaman, maman, maman, maman\n\nJ'ai mis des bisous dans mon dessin\nMaman je t'aime\nJ'en ai mis partout dans mon dessin\nMaman je t'aime\nJ'ai mis tout autour tout mon amour\nMaman je t'aime\nUn petit ruban, joli ruban\nJe t'aime maman\nMaman, maman, maman, maman\nUn petit ruban, joli ruban\nJe t'aime maman" },
+            { title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie" },
+            { title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "Un souffle pur,\nau creux d'un grand silence,\nUn havre doux, une immense présence.\nDe ce refuge, jaillit un feu constant,\nUne chaleur, pour un élan vibrant.\n\nJe suis l'éclat, d'un soleil de printemps,\nJe trouve là, un amour de géant.\n\nVers cet éclat, court un fleuve de vie,\nUn chant puissant,\npour une force infinie.\nDans ce voyage,\ns'ouvre une seule maison,\nUne racine, au bout de l'horizon.\n\nJe deviens fleur, au creux de ce jardin,\nJe perds la peur, en serrant cette main.\n\nUn cycle pur, de la terre au sommet,\nJe reste là, pour la vie, à jamais.\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais." }
+        ];
+        const audio = document.getElementById('audio-element');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTitle = document.getElementById('current-title');
+        const currentArtistAlbum = document.getElementById('current-artist-album');
+        let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
+        const listContainer = document.getElementById('track-list');
+        playlist.forEach((track, index) => {
+            const div = document.createElement('div');
+            div.className = 'track';
+            div.innerHTML = `<div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé</p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a>`;
+            listContainer.appendChild(div);
+        });
+        function togglePlay() {
+            if (audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; }
+            else { audio.pause(); iconPlay.style.display = "block"; iconPause.style.display = "none"; }
+        }
+        function playTrack(index, startTime = 0) {
+            currentIndex = index;
+            localStorage.setItem('dizzeur_index', currentIndex);
+            currentTitle.classList.add('fade-out');
+            currentArtistAlbum.classList.add('fade-out');
+            setTimeout(() => {
+                audio.src = playlist[currentIndex].url;
+                currentTitle.innerText = playlist[currentIndex].title;
+                currentArtistAlbum.innerText = "Hanaé - " + playlist[currentIndex].album;
+                currentTitle.classList.remove('fade-out');
+                currentArtistAlbum.classList.remove('fade-out');
+                audio.currentTime = startTime;
+                if (startTime === 0 || !audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; }
+            }, 500);
+        }
+        audio.ontimeupdate = () => { if (audio.duration) { progressBar.value = (audio.currentTime / audio.duration) * 100; localStorage.setItem('dizzeur_time', audio.currentTime); } };
+        progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
+        window.onload = () => { const savedTime = parseFloat(localStorage.getItem('dizzeur_time')) || 0; playTrack(currentIndex, savedTime); iconPlay.style.display = "block"; iconPause.style.display = "none"; };
+        function toggleLyrics() { const overlay = document.getElementById('lyrics-overlay'); if (overlay.style.display === 'block') overlay.style.display = 'none'; else { document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics; document.getElementById('lyrics-title').innerText = playlist[currentIndex].title; overlay.style.display = 'block'; } }
+        audio.onended = () => { if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1); };
     </script>
 </body>
 </html>
