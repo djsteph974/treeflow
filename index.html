@@ -4,39 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>Dizzeur v1.3.2</title>
+    <title>Dizzeur v1.5.2</title>
     <style>
         body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .container { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
-
-        .header-sticky {
-            position: sticky; top: 0; z-index: 100;
-            display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe;
-            background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu');
-            background-size: cover; background-position: center; overflow: hidden;
-        }
+        .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; overflow: hidden; }
         .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
+        .share-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 10; }
+        
+        .like-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s; }
+        .like-btn:active { transform: scale(1.2); }
+        #like-counter { font-size: 12px; color: #bc13fe; margin-top: 2px; font-weight: bold; }
 
         .jaquette-container { width: 50%; aspect-ratio: 1/1; margin: 10px auto; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; background-position: center; border: 2px solid #bc13fe; cursor: pointer; position: relative; z-index: 1; }
-        
         #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
         #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
         #current-artist-album { font-size: 14px; margin: 0; color: #bc13fe; transition: opacity 0.5s; }
         .fade-out { opacity: 0; }
-
         .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
-        
-        #play-pause-btn { 
-            background: #bc13fe; border: none; border-radius: 50%; 
-            width: 45px; height: 45px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            padding: 0; transition: background 0.2s;
-        }
+        #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
         #play-pause-btn svg { width: 22px; height: 22px; fill: white; }
         #icon-pause { display: none; }
-
         #progress-bar { flex-grow: 1; accent-color: #bc13fe; cursor: pointer; }
-
         .track-list { width: 95%; margin: 10px auto; padding-bottom: 20px; }
         .track { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .track-info-text { cursor: pointer; flex-grow: 1; }
@@ -44,40 +33,29 @@
         .track p { margin: 0; font-size: 12px; color: #bc13fe; }
         .download-btn { background: none; border: none; cursor: pointer; padding: 5px; }
         .download-btn svg { width: 24px; height: 24px; fill: #bc13fe; }
-
         #lyrics-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
         #lyrics-content { font-size: 16px; line-height: 1.8; margin-top: 40px; white-space: pre-line; color: #ddd; }
         .close-lyrics { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; color: #bc13fe; }
     </style>
 </head>
 <body>
-
-    <div id="lyrics-overlay">
-        <span class="close-lyrics" onclick="toggleLyrics()">×</span>
-        <h2 id="lyrics-title" style="color: #bc13fe;">Paroles</h2>
-        <div id="lyrics-content"></div>
-    </div>
-
+    <div id="lyrics-overlay"><span class="close-lyrics" onclick="toggleLyrics()">×</span><h2 id="lyrics-title" style="color: #bc13fe;">Paroles</h2><div id="lyrics-content"></div></div>
+    
     <div class="container">
         <div class="header-sticky">
             <div class="header-sticky-blur"></div>
-            <div class="jaquette-container" onclick="toggleLyrics()"></div>
+            <div class="share-btn" onclick="handleShare()"><svg width="26" height="26" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
             
-            <div id="track-info">
-                <h2 id="current-title">Dizzeur v1.3.2</h2>
-                <p id="current-artist-album">Hanaé</p>
+            <div class="like-btn" onclick="handleLikeClick()">
+                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                <div id="like-counter">0</div>
             </div>
 
-            <div class="controls-container">
-                <button id="play-pause-btn" onclick="togglePlay()">
-                    <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    <svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                </button>
-                <input type="range" id="progress-bar" value="0" max="100">
-            </div>
+            <div class="jaquette-container" onclick="toggleLyrics()"></div>
+            <div id="track-info"><h2 id="current-title">Dizzeur v1.5.2</h2><p id="current-artist-album">Hanaé</p></div>
+            <div class="controls-container"><button id="play-pause-btn" onclick="togglePlay()"><svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button><input type="range" id="progress-bar" value="0" max="100"></div>
             <audio id="audio-element"></audio>
         </div>
-        
         <div class="track-list" id="track-list"></div>
     </div>
 
@@ -95,40 +73,44 @@
         const progressBar = document.getElementById('progress-bar');
         const currentTitle = document.getElementById('current-title');
         const currentArtistAlbum = document.getElementById('current-artist-album');
+        const counterDisplay = document.getElementById('like-counter');
+        const likeSvg = document.getElementById('like-svg');
         let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
 
-        const listContainer = document.getElementById('track-list');
-        playlist.forEach((track, index) => {
-            const div = document.createElement('div');
-            div.className = 'track';
-            div.innerHTML = `<div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé</p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a>`;
-            listContainer.appendChild(div);
-        });
+        const API_KEY = "dizzeur_v152_hanae";
+        const API_BASE = "https://api.countapi.xyz";
 
-        function updateMediaSession(track) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: 'Hanaé',
-                    album: track.album,
-                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
-                });
-                navigator.mediaSession.setActionHandler('play', () => togglePlay());
-                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-                navigator.mediaSession.setActionHandler('previoustrack', () => { if (currentIndex > 0) playTrack(currentIndex - 1); });
-                navigator.mediaSession.setActionHandler('nexttrack', () => { if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1); });
-            }
+        async function fetchLikes() {
+            try {
+                const res = await fetch(`${API_BASE}/get/${API_KEY}/likes`);
+                const data = await res.json();
+                if (data.value !== undefined) counterDisplay.innerText = data.value;
+                if (localStorage.getItem('dizzeur_liked')) likeSvg.style.fill = "#bc13fe";
+            } catch(e) { console.log("Erreur de lecture"); }
         }
 
-        function togglePlay() {
-            if (audio.paused) { 
-                audio.play(); 
-                iconPlay.style.display = "none";
-                iconPause.style.display = "block";
-            } else { 
-                audio.pause(); 
-                iconPlay.style.display = "block";
-                iconPause.style.display = "none";
+        async function handleLikeClick() {
+            const isLiked = localStorage.getItem('dizzeur_liked');
+            const action = isLiked ? "update?amount=-1" : "hit";
+            
+            try {
+                const res = await fetch(`${API_BASE}/${action}/${API_KEY}/likes`);
+                const data = await res.json();
+                if (data.value !== undefined) {
+                    counterDisplay.innerText = data.value;
+                    if (isLiked) {
+                        localStorage.removeItem('dizzeur_liked');
+                        likeSvg.style.fill = "none";
+                    } else {
+                        localStorage.setItem('dizzeur_liked', 'true');
+                        likeSvg.style.fill = "#bc13fe";
+                    }
+                }
+            } catch(e) { 
+                let val = parseInt(counterDisplay.innerText);
+                counterDisplay.innerText = isLiked ? val - 1 : val + 1;
+                if (isLiked) { localStorage.removeItem('dizzeur_liked'); likeSvg.style.fill = "none"; }
+                else { localStorage.setItem('dizzeur_liked', 'true'); likeSvg.style.fill = "#bc13fe"; }
             }
         }
 
@@ -145,41 +127,34 @@
                 currentTitle.classList.remove('fade-out');
                 currentArtistAlbum.classList.remove('fade-out');
                 audio.currentTime = startTime;
-                if (startTime === 0 || !audio.paused) {
-                    audio.play();
-                    iconPlay.style.display = "none";
-                    iconPause.style.display = "block";
-                }
-                updateMediaSession(track);
+                if (startTime === 0 || !audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; }
             }, 500);
         }
 
-        audio.ontimeupdate = () => {
-            if (audio.duration) {
-                progressBar.value = (audio.currentTime / audio.duration) * 100;
-                localStorage.setItem('dizzeur_time', audio.currentTime);
-            }
-        };
+        function togglePlay() { 
+            if (audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; } 
+            else { audio.pause(); iconPlay.style.display = "block"; iconPause.style.display = "none"; }
+        }
 
+        function handleShare() { if (navigator.share) navigator.share({ title: 'Dizzeur', url: window.location.href }); }
+
+        playlist.forEach((track, index) => {
+            const div = document.createElement('div');
+            div.className = 'track';
+            div.innerHTML = `<div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé</p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a>`;
+            document.getElementById('track-list').appendChild(div);
+        });
+
+        audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
 
-        window.onload = () => {
-            const savedTime = parseFloat(localStorage.getItem('dizzeur_time')) || 0;
-            playTrack(currentIndex, savedTime);
-            iconPlay.style.display = "block";
-            iconPause.style.display = "none";
-        };
+        window.onload = () => { fetchLikes(); playTrack(currentIndex); };
 
         function toggleLyrics() {
             const overlay = document.getElementById('lyrics-overlay');
             if (overlay.style.display === 'block') overlay.style.display = 'none';
-            else {
-                document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics;
-                document.getElementById('lyrics-title').innerText = playlist[currentIndex].title;
-                overlay.style.display = 'block';
-            }
+            else { document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics; document.getElementById('lyrics-title').innerText = playlist[currentIndex].title; overlay.style.display = 'block'; }
         }
-
         audio.onended = () => { if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1); };
     </script>
 </body>
