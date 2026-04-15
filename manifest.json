@@ -8,9 +8,10 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
