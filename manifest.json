@@ -1,13 +1,14 @@
 {
-  "name": "TreeFlow",
+  "name": "TreeFlow Music",
   "short_name": "TreeFlow",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#bc13fe",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://lh3.googleusercontent.com/d/1z1C4Ue1XRstppPFk5H5owIreFymukBdJ",
+      "src": "https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI",
       "sizes": "512x512",
       "type": "image/png"
     }
