@@ -126,13 +126,54 @@
                 currentTitle.classList.remove('fade-out');
                 currentArtistAlbum.classList.remove('fade-out');
                 audio.currentTime = startTime;
-                if (startTime === 0 || !audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; }
+
+                // Mise à jour de l'affichage Bluetooth / Écran de verrouillage
+                updateMediaSession(track);
+
+                if (startTime === 0 || !audio.paused) { 
+                    audio.play(); 
+                    iconPlay.style.display = "none"; 
+                    iconPause.style.display = "block"; 
+                }
             }, 500);
         }
 
+        function updateMediaSession(track) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: 'Hanaé',
+                    album: track.album,
+                    artwork: [
+                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                // Gestion des boutons physiques externes
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    if (currentIndex > 0) playTrack(currentIndex - 1);
+                });
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1);
+                });
+            }
+        }
+
         function togglePlay() { 
-            if (audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; } 
-            else { audio.pause(); iconPlay.style.display = "block"; iconPause.style.display = "none"; }
+            if (audio.paused) { 
+                audio.play(); 
+                iconPlay.style.display = "none"; 
+                iconPause.style.display = "block"; 
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+            } 
+            else { 
+                audio.pause(); 
+                iconPlay.style.display = "block"; 
+                iconPause.style.display = "none"; 
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+            }
         }
 
         function handleShare() { if (navigator.share) navigator.share({ title: 'Dizzeur', url: window.location.href }); }
