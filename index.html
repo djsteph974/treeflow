@@ -144,11 +144,24 @@
         .track-num { color: var(--violet); width: 30px; font-weight: 900; }
         .track-name { flex: 1; font-weight: 500; }
 
-        /* DISCOGRAPHIE */
+        /* DISCOGRAPHIE AVEC DÉFILEMENT */
+        .album-scroll-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .album-scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
         .album-link {
             text-decoration: none;
             color: inherit;
             display: inline-block;
+            flex: 0 0 170px; /* Taille fixe pour le défilement */
         }
 
         .album-card { width: 170px; margin-top: 10px; }
@@ -156,7 +169,7 @@
             width: 170px;
             height: 170px;
             border-radius: 18px;
-            background: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI');
+            background: url('https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc');
             background-size: cover;
             background-position: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -171,7 +184,7 @@
         .album-card:active .cover { transform: scale(0.98); }
 
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: #fff; }
-        .album-title { font-weight: bold; margin-top: 12px; display: block; }
+        .album-title { font-weight: bold; margin-top: 12px; display: block; line-height: 1.2; }
     </style>
 </head>
 <body>
@@ -216,12 +229,21 @@
 
     <section>
         <h2>Discographie</h2>
-        <a href="album_hanaé.html" class="album-link">
-            <div class="album-card">
-                <div class="cover"><div class="mini-play">▶</div></div>
-                <span class="album-title">Une Chanson Douce</span>
-            </div>
-        </a>
+        <div class="album-scroll-container">
+            <a href="album_hanaé.html" class="album-link">
+                <div class="album-card">
+                    <div class="cover"><div class="mini-play">▶</div></div>
+                    <span class="album-title">Une Chanson Douce</span>
+                </div>
+            </a>
+
+            <a href="album_instru.html" class="album-link">
+                <div class="album-card">
+                    <div class="cover"><div class="mini-play">▶</div></div>
+                    <span class="album-title">Une Chanson Douce - Instru</span>
+                </div>
+            </a>
+        </div>
     </section>
 
     <script>
