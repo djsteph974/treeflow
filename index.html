@@ -8,9 +8,7 @@
         :root { --violet: #cc00ff; --rose: #ff00cc; --noir: #000; }
         body { background-color: var(--noir); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
-        /* BANNIÈRE ORIGINALE RÉTABLIE */
         .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
-        
         .header { padding: 15px 20px; }
         h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
         
@@ -53,19 +51,14 @@
 
         .album-scroll-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .album-scroll-container::-webkit-scrollbar { display: none; }
-        
         .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; }
-        
-        /* COVERS AVEC IMAGE ORIGINALE (ROND) RÉTABLIES */
         .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
 
     <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
-    
     <div class="header"><h1>Hanaé</h1></div>
 
     <div class="actions">
@@ -116,17 +109,30 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        // Références Firebase
         const likeRef = doc(db, "stats", "likes");
-        const likeBtn = document.getElementById('btnLike');
+        const trackStatsRef = doc(db, "stats", "track_stats_douce"); // Document partagé avec l'album
 
-        if(localStorage.getItem('hanae_liked')) {
-            likeBtn.classList.add('liked');
-        }
+        const likeBtn = document.getElementById('btnLike');
+        const audio = document.getElementById('audioPlayer');
+        const mainBtn = document.getElementById('mainPlayBtn');
+        const listContainer = document.getElementById('track-list');
+
+        const playlist = [
+            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3' },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3' },
+            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3' },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3' }
+        ];
+
+        let currentIndex = -1;
+
+        // --- SYNCHRO LIKES ---
+        if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
 
         onSnapshot(likeRef, (snap) => {
-            if (snap.exists()) {
-                document.getElementById('likeCount').innerText = snap.data().count;
-            }
+            if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count;
         });
 
         window.lancerLike = async () => {
@@ -136,27 +142,42 @@
                     localStorage.setItem('hanae_liked', 'true');
                     likeBtn.classList.add('liked');
                 } catch (e) { console.error("Firebase Error", e); }
-            } else {
-                alert("Vous avez déjà liké ! ❤️");
             }
         };
         
         likeBtn.onclick = window.lancerLike;
-    </script>
 
-    <script>
-        const playlist = [
-            { title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3' },
-            { title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3' },
-            { title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3' },
-            { title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3' }
-        ];
+        // --- LOGIQUE LECTEUR + COMPTEUR SILENCIEUX ---
+        window.jouer = async (i) => {
+            if (currentIndex !== -1) {
+                const prev = document.getElementById(`t-${currentIndex}`);
+                if (prev) prev.classList.remove('active');
+            }
+            
+            currentIndex = i;
+            const track = playlist[i];
+            
+            // Mise à jour du compteur de vues (Silencieux)
+            try {
+                await updateDoc(trackStatsRef, { [track.id]: increment(1) });
+            } catch(e) { console.error("Erreur stats", e); }
 
-        let currentIndex = -1;
-        const audio = document.getElementById('audioPlayer');
-        const mainBtn = document.getElementById('mainPlayBtn');
-        const listContainer = document.getElementById('track-list');
+            audio.src = track.url;
+            audio.play();
+            document.getElementById(`t-${i}`).classList.add('active');
+            mainBtn.classList.add('playing');
+        };
 
+        window.togglePlay = () => {
+            if (currentIndex === -1) { window.jouer(0); return; }
+            if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
+            else { audio.pause(); mainBtn.classList.remove('playing'); }
+        };
+
+        window.nextTrack = () => window.jouer((currentIndex + 1) % playlist.length);
+        window.prevTrack = () => window.jouer((currentIndex - 1 + playlist.length) % playlist.length);
+
+        // --- GÉNÉRATION LISTE ---
         playlist.forEach((t, i) => {
             listContainer.innerHTML += `
                 <div class="track" id="t-${i}" onclick="jouer(${i})">
@@ -164,24 +185,6 @@
                     <span class="track-name">${t.title}</span>
                 </div>`;
         });
-
-        window.jouer = (i) => {
-            if (currentIndex !== -1) document.getElementById(`t-${currentIndex}`).classList.remove('active');
-            currentIndex = i;
-            audio.src = playlist[i].url;
-            audio.play();
-            document.getElementById(`t-${i}`).classList.add('active');
-            mainBtn.classList.add('playing');
-        };
-
-        window.togglePlay = () => {
-            if (currentIndex === -1) { jouer(0); return; }
-            if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
-            else { audio.pause(); mainBtn.classList.remove('playing'); }
-        };
-
-        window.nextTrack = () => jouer((currentIndex + 1) % playlist.length);
-        window.prevTrack = () => jouer((currentIndex - 1 + playlist.length) % playlist.length);
     </script>
 </body>
 </html>
