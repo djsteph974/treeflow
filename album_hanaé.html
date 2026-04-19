@@ -8,22 +8,39 @@
     <style>
         body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .container { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
-        .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; overflow: hidden; }
+        
+        .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; }
         .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
+        
         .share-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 10; }
-        .like-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s; }
+        
+        /* FIX DEFINITIF DU COEUR : Viewbox large et overflow visible */
+        .like-btn { 
+            position: absolute; 
+            top: 15px; 
+            right: 15px; 
+            cursor: pointer; 
+            z-index: 110; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 40px;
+            transition: transform 0.2s;
+        }
         .like-btn:active { transform: scale(1.2); }
+        #like-svg { width: 28px; height: 28px; overflow: visible !important; }
         #like-counter { font-size: 12px; color: #bc13fe; margin-top: 2px; font-weight: bold; }
+        
         .jaquette-container { width: 50%; aspect-ratio: 1/1; margin: 10px auto; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; background-position: center; border: 2px solid #bc13fe; cursor: pointer; position: relative; z-index: 1; }
         #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
         #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
         #current-artist-album { font-size: 14px; margin: 0; color: #bc13fe; transition: opacity 0.5s; }
-        .fade-out { opacity: 0; }
+        
         .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
         #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
         #play-pause-btn svg { width: 22px; height: 22px; fill: white; }
-        #icon-pause { display: none; }
         #progress-bar { flex-grow: 1; accent-color: #bc13fe; cursor: pointer; }
+        
         .track-list { width: 95%; margin: 10px auto; padding-bottom: 20px; }
         .track { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .track-info-text { cursor: pointer; flex-grow: 1; }
@@ -32,9 +49,11 @@
         .play-count { color: #888; font-size: 11px; font-style: italic; }
         .download-btn { background: none; border: none; cursor: pointer; padding: 5px; }
         .download-btn svg { width: 24px; height: 24px; fill: #bc13fe; }
+
         #lyrics-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
         #lyrics-content { font-size: 16px; line-height: 1.8; margin-top: 40px; white-space: pre-line; color: #ddd; }
         .close-lyrics { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; color: #bc13fe; }
+        .fade-out { opacity: 0; }
     </style>
 </head>
 <body>
@@ -44,10 +63,14 @@
         <div class="header-sticky">
             <div class="header-sticky-blur"></div>
             <div class="share-btn" onclick="handleShare()"><svg width="26" height="26" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
+            
             <div class="like-btn" onclick="handleLikeClick()">
-                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 0 0 0 0-7.78z"></path></svg>
+                <svg id="like-svg" viewBox="-2 -2 28 28" fill="none" stroke="#bc13fe" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
                 <div id="like-counter">...</div>
             </div>
+
             <div class="jaquette-container" onclick="toggleLyrics()"></div>
             <div id="track-info"><h2 id="current-title">Chargement...</h2><p id="current-artist-album">Hanaé</p></div>
             <div class="controls-container">
@@ -115,15 +138,11 @@
         const iconPlay = document.getElementById('icon-play');
         const iconPause = document.getElementById('icon-pause');
         const progressBar = document.getElementById('progress-bar');
-        const currentTitle = document.getElementById('current-title');
-        const currentArtistAlbum = document.getElementById('current-artist-album');
         const counterDisplay = document.getElementById('like-counter');
         const likeSvg = document.getElementById('like-svg');
         let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
 
-        // --- SYNCHRO TEMPS RÉEL ---
         onSnapshot(likeRef, (snap) => { if (snap.exists()) counterDisplay.innerText = snap.data().count; });
-        
         onSnapshot(trackStatsRef, (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
@@ -136,52 +155,28 @@
 
         window.handleLikeClick = async () => {
             if (!localStorage.getItem('liked_album_douce')) {
-                try {
-                    await updateDoc(likeRef, { count: increment(1) });
-                    localStorage.setItem('liked_album_douce', 'true');
-                    likeSvg.style.fill = "#bc13fe";
-                } catch(e) { console.error(e); }
+                await updateDoc(likeRef, { count: increment(1) });
+                localStorage.setItem('liked_album_douce', 'true');
+                likeSvg.style.fill = "#bc13fe";
             }
         };
-
         if (localStorage.getItem('liked_album_douce')) likeSvg.style.fill = "#bc13fe";
 
-        // --- LOGIQUE LECTEUR ---
         window.playTrack = async (index, startTime = 0) => {
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('dizzeur_index', currentIndex);
-            
-            // 1. Incrémentation immédiate du compteur Firebase
-            try {
-                await updateDoc(trackStatsRef, { [track.id]: increment(1) });
-            } catch(e) { console.error("Erreur stats", e); }
-
-            // 2. Mise à jour de l'interface
-            currentTitle.classList.add('fade-out');
-            
-            setTimeout(() => {
-                audio.src = track.url;
-                currentTitle.innerText = track.title;
-                currentArtistAlbum.innerText = "Hanaé - " + track.album;
-                currentTitle.classList.remove('fade-out');
-                audio.currentTime = startTime;
-
-                // 3. Gestion de la lecture (avec gestion du blocage navigateur)
-                audio.play().then(() => {
-                    iconPlay.style.display = "none"; 
-                    iconPause.style.display = "block";
-                }).catch(error => {
-                    console.log("Lecture en attente d'interaction.");
-                    iconPlay.style.display = "block"; 
-                    iconPause.style.display = "none";
-                });
-            }, 500);
+            try { await updateDoc(trackStatsRef, { [track.id]: increment(1) }); } catch(e) {}
+            document.getElementById('current-title').innerText = track.title;
+            document.getElementById('current-artist-album').innerText = "Hanaé - " + track.album;
+            audio.src = track.url;
+            audio.currentTime = startTime;
+            audio.play().then(() => { iconPlay.style.display="none"; iconPause.style.display="block"; });
         };
 
         window.togglePlay = () => { 
-            if (audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; } 
-            else { audio.pause(); iconPlay.style.display = "block"; iconPause.style.display = "none"; }
+            if (audio.paused) { audio.play(); iconPlay.style.display="none"; iconPause.style.display="block"; } 
+            else { audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none"; }
         };
 
         window.toggleLyrics = () => {
@@ -196,29 +191,16 @@
 
         window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music', url: window.location.href }); };
 
-        // --- GÉNÉRATION LISTE ---
         const listDiv = document.getElementById('track-list');
         playlist.forEach((track, index) => {
-            const div = document.createElement('div');
-            div.className = 'track';
-            div.innerHTML = `
-                <div class="track-info-text" onclick="playTrack(${index})">
-                    <h3>${track.title}</h3>
-                    <p>Hanaé <span class="play-count" id="count-${track.id}">0 écoutes</span></p>
-                </div>
-                <a href="${track.url}" download class="download-btn">
-                    <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
-                </a>`;
-            listDiv.appendChild(div);
+            listDiv.innerHTML += `<div class="track"><div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé <span class="play-count" id="count-${track.id}">0 écoutes</span></p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a></div>`;
         });
 
         audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.addEventListener('load', () => {
-            window.playTrack(currentIndex, 0);
-        });
+        window.addEventListener('load', () => { window.playTrack(currentIndex, 0); });
     </script>
 </body>
 </html>
