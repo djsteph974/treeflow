@@ -45,7 +45,7 @@
             <div class="header-sticky-blur"></div>
             <div class="share-btn" onclick="handleShare()"><svg width="26" height="26" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
             <div class="like-btn" onclick="handleLikeClick()">
-                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 0 0 0 0-7.78z"></path></svg>
                 <div id="like-counter">...</div>
             </div>
             <div class="jaquette-container" onclick="toggleLyrics()"></div>
@@ -81,10 +81,34 @@
         const trackStatsRef = doc(db, "stats", "track_stats_douce");
 
         const playlist = [
-            { id: 'bonne_fete', title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "..." },
-            { id: 'maman_je_taime', title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "..." },
-            { id: 'chanson_douce', title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "..." },
-            { id: 'grace_fleur', title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "..." }
+            { 
+                id: 'bonne_fete', 
+                title: 'Bonne Fête Maman', 
+                album: 'Une Chanson Douce', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', 
+                lyrics: "J't'ai fait une chanson,\nune belle chanson\nMaman\nJ'ai gratté les cordes au médiator\nMaman\nSur ma guitare, j'y ai mis du cœur\nMaman\nPour que ça résonne, à toute heure\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nJ'ai joué du piano et du xylo\nMaman\nSorti mon stylo et mon micro\nMaman\nJ'ai mis mon casque sur les oreilles\nMaman\nJ'ai mis le paquet dans ma belle voix\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nGravé dans le noir, sur ce grand disque\nMaman\nPour toi je chante, je prends le risque\nMaman\nPose le diamant et écoute ma voix\nMaman\nC'est notre chanson, juste pour toi\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nDans cette pochette noire,\nun beau vinyle\nC'est pour toi maman" 
+            },
+            { 
+                id: 'maman_je_taime', 
+                title: 'Maman Je t\'aime', 
+                album: 'Une Chanson Douce', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', 
+                lyrics: "J't'ai fait un dessin, un beau dessin\nMaman je t'aime\nPlein de petites fleurs et de p'tits cœurs\nMaman je t'aime\nJ'ai fait un mouton tout blanc, tout rond\nMaman je t'aime\nAvec des p'tits yeux\ntout ronds, tout bleus\nMaman je t'aime\nMaman, maman, maman, maman\n\nY a des papillons tout en couleurs\nMaman je t'aime\nY a des papillons sur chaque fleur\nMaman je t'aime\nJ'en ai mis tout plein dans mon dessin\nMaman je t'aime\nEt en majuscules\ndans une grosse bulle\nMaman je t'aime\nMaman, maman, maman, maman\n\nJ'ai mis des bisous dans mon dessin\nMaman je t'aime\nJ'en ai mis partout dans mon dessin\nMaman je t'aime\nJ'ai mis tout autour tout mon amour\nMaman je t'aime\nUn petit ruban, joli ruban\nJe t'aime maman\nMaman, maman, maman, maman\nUn petit ruban, joli ruban\nJe t'aime maman"
+            },
+            { 
+                id: 'chanson_douce', 
+                title: 'Une Chanson Douce', 
+                album: 'Une Chanson Douce', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', 
+                lyrics:"Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie"
+            },
+            { 
+                id: 'grace_fleur', 
+                title: 'La Grâce de la Fleur', 
+                album: 'Une Chanson Douce', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', 
+                lyrics: "Un souffle pur,\nau creux d'un grand silence,\nUn havre doux, une immense présence.\nDe ce refuge, jaillit un feu constant,\nUne chaleur, pour un élan vibrant.\n\nJe suis l'éclat, d'un soleil de printemps,\nJe trouve là, un amour de géant.\n\nVers cet éclat, court un fleuve de vie,\nUn chant puissant,\npour une force infinie.\nDans ce voyage,\ns'ouvre une seule maison,\nUne racine, au bout de l'horizon.\n\nJe deviens fleur, au creux de ce jardin,\nJe perds la peur, en serrant cette main.\n\nUn cycle pur, de la terre au sommet,\nJe reste là, pour la vie, à jamais.\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais."
+            }
         ];
 
         const audio = document.getElementById('audio-element');
@@ -143,13 +167,12 @@
                 currentTitle.classList.remove('fade-out');
                 audio.currentTime = startTime;
 
-                // 3. Gestion de la lecture (auto ou manuelle)
+                // 3. Gestion de la lecture (avec gestion du blocage navigateur)
                 audio.play().then(() => {
                     iconPlay.style.display = "none"; 
                     iconPause.style.display = "block";
                 }).catch(error => {
-                    // Si le navigateur bloque l'autoplay, on reste en mode pause visuellement
-                    console.log("Lecture en attente d'interaction utilisateur.");
+                    console.log("Lecture en attente d'interaction.");
                     iconPlay.style.display = "block"; 
                     iconPause.style.display = "none";
                 });
@@ -193,7 +216,6 @@
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        // Lancement au chargement de la page
         window.addEventListener('load', () => {
             window.playTrack(currentIndex, 0);
         });
