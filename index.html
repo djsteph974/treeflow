@@ -12,7 +12,28 @@
         h1 { font-size: 3rem; margin: 0; font-weight: 900; }
         
         .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
-        .btn-like { background: rgba(30,0,50,0.9); border: 1px solid var(--violet); border-radius: 25px; padding: 10px 20px; color: var(--violet); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        /* Style du bouton Like */
+        .btn-like { 
+            background: rgba(30,0,50,0.9); 
+            border: 1px solid var(--violet); 
+            border-radius: 25px; 
+            padding: 10px 20px; 
+            color: var(--violet); 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        /* Style quand déjà liké */
+        .btn-like.liked {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 0, 204, 0.4);
+        }
         
         .player-controls { display: flex; align-items: center; gap: 15px; }
         .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
@@ -85,6 +106,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const likeRef = doc(db, "stats", "likes");
+        const likeBtnElement = document.getElementById('btnLike');
+
+        // Vérification immédiate au chargement pour le style du bouton
+        if(localStorage.getItem('has_liked_hanae')) {
+            likeBtnElement.classList.add('liked');
+        }
 
         // Écouter les likes en temps réel
         onSnapshot(likeRef, (docSnap) => {
@@ -93,13 +120,21 @@
             }
         });
 
-        // Fonction pour ajouter un like (attachée à la fenêtre pour être accessible via onclick)
+        // Fonction Like sécurisée
         window.ajouterLike = async () => {
-            await updateDoc(likeRef, {
-                count: increment(1)
-            });
+            if (!localStorage.getItem('has_liked_hanae')) {
+                try {
+                    await updateDoc(likeRef, { count: increment(1) });
+                    localStorage.setItem('has_liked_hanae', 'true');
+                    likeBtnElement.classList.add('liked');
+                } catch (e) {
+                    console.error("Erreur:", e);
+                }
+            } else {
+                alert("Vous avez déjà liké ! ❤️");
+            }
         };
-        document.getElementById('btnLike').onclick = window.ajouterLike;
+        likeBtnElement.onclick = window.ajouterLike;
     </script>
 
     <script>
