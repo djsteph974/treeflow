@@ -54,6 +54,15 @@
         .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; }
         .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
+
+        /* Section Commentaires */
+        .comment-box { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .comment-input, .comment-pseudo { width: 100%; background: #222; border: 1px solid #444; border-radius: 8px; color: white; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
+        .comment-btn { background: var(--violet); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        #comments-list { margin-top: 20px; }
+        .comment-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--violet); }
+        .comment-item b { color: var(--rose); font-size: 0.9rem; display: block; margin-bottom: 4px; }
+        .comment-item p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -94,9 +103,19 @@
         </div>
     </section>
 
+    <section>
+        <h2>Livre d'or</h2>
+        <div class="comment-box">
+            <input type="text" id="pseudo" class="comment-pseudo" placeholder="Ton pseudo..." required>
+            <textarea id="comment" class="comment-input" placeholder="Laisse un petit message pour Hanaé..." rows="3" required></textarea>
+            <button class="comment-btn" id="sendComment">Publier le message</button>
+            <div id="comments-list"></div>
+        </div>
+    </section>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -113,84 +132,100 @@
         const likeRef = doc(db, "stats", "likes");
         const statsDouceRef = doc(db, "stats", "track_stats_douce");
         const statsInstruRef = doc(db, "stats", "track_stats_douce_instru");
+        const commentsCol = collection(db, "comments");
 
         const likeBtn = document.getElementById('btnLike');
         const audio = document.getElementById('audioPlayer');
         const mainBtn = document.getElementById('mainPlayBtn');
         const listContainer = document.getElementById('track-list');
 
-        // Base de données complète pour le calcul du Top 5
         const allTracks = [
             { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'normal' },
             { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'normal' },
             { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal' },
             { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal' },
-            { id: 'chanson_douce', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru' },
-            { id: 'grace_fleur', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru' },
-            { id: 'bonne_fete', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru' },
-            { id: 'maman_je_taime', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru' }
+            { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru' },
+            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru' },
+            { id: 'bonne_fete_instru', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru' },
+            { id: 'maman_je_taime_instru', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru' }
         ];
 
         let currentTop5 = [];
         let currentIndex = -1;
         let statsData = { normal: {}, instru: {} };
 
-        // --- MISE À JOUR ET TRI DU TOP 5 ---
         const updateDisplay = () => {
             const scoredTracks = allTracks.map(track => ({
                 ...track,
                 plays: statsData[track.type][track.id] || 0
             }));
-
-            // Tri par nombre d'écoutes décroissant
             currentTop5 = scoredTracks.sort((a, b) => b.plays - a.plays).slice(0, 5);
-
             listContainer.innerHTML = "";
             currentTop5.forEach((t, i) => {
                 const activeClass = (currentIndex === i) ? 'active' : '';
                 listContainer.innerHTML += `
-                    <div class="track ${activeClass}" id="t-${i}" onclick="jouer(${i})">
+                    <div class="track ${activeClass}" onclick="jouer(${i})">
                         <span class="track-num">${i+1}</span>
                         <span class="track-name">${t.title}</span>
                     </div>`;
             });
         };
 
-        // --- ECOUTE DES STATS FIREBASE ---
-        onSnapshot(statsDouceRef, (snap) => {
-            if (snap.exists()) { statsData.normal = snap.data(); updateDisplay(); }
-        });
-        onSnapshot(statsInstruRef, (snap) => {
-            if (snap.exists()) { statsData.instru = snap.data(); updateDisplay(); }
+        onSnapshot(statsDouceRef, snap => { if (snap.exists()) { statsData.normal = snap.data(); updateDisplay(); } });
+        onSnapshot(statsInstruRef, snap => { if (snap.exists()) { statsData.instru = snap.data(); updateDisplay(); } });
+        onSnapshot(likeRef, snap => { if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count; });
+
+        // --- GESTION COMMENTAIRES ---
+        const btnSend = document.getElementById('sendComment');
+        const pseudoInput = document.getElementById('pseudo');
+        const commentInput = document.getElementById('comment');
+        const commentsList = document.getElementById('comments-list');
+
+        btnSend.onclick = async () => {
+            const pseudo = pseudoInput.value.trim();
+            const text = commentInput.value.trim();
+            
+            if(!pseudo || !text) { alert("Merci d'entrer un pseudo et un message !"); return; }
+
+            try {
+                await addDoc(commentsCol, {
+                    author: pseudo,
+                    content: text,
+                    timestamp: Date.now()
+                });
+                commentInput.value = "";
+            } catch(e) { console.error(e); }
+        };
+
+        // Lecture temps réel des 10 derniers messages
+        const q = query(commentsCol, orderBy("timestamp", "desc"), limit(10));
+        onSnapshot(q, (snap) => {
+            commentsList.innerHTML = "";
+            snap.forEach(doc => {
+                const c = doc.data();
+                commentsList.innerHTML += `
+                    <div class="comment-item">
+                        <b>${c.author}</b>
+                        <p>${c.content}</p>
+                    </div>`;
+            });
         });
 
-        // --- SYNCHRO LIKES ---
-        if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
-        onSnapshot(likeRef, (snap) => {
-            if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count;
-        });
-
-        window.lancerLike = async () => {
+        // --- LOGIQUE LECTEUR & LIKES ---
+        likeBtn.onclick = async () => {
             if (!localStorage.getItem('hanae_liked')) {
-                try {
-                    await updateDoc(likeRef, { count: increment(1) });
-                    localStorage.setItem('hanae_liked', 'true');
-                    likeBtn.classList.add('liked');
-                } catch (e) { console.error("Firebase Error", e); }
+                await updateDoc(likeRef, { count: increment(1) });
+                localStorage.setItem('hanae_liked', 'true');
+                likeBtn.classList.add('liked');
             }
         };
-        likeBtn.onclick = window.lancerLike;
+        if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
 
-        // --- LOGIQUE LECTEUR ---
         window.jouer = async (i) => {
             currentIndex = i;
             const track = currentTop5[i];
-            
             const ref = track.type === 'normal' ? statsDouceRef : statsInstruRef;
-            try {
-                await updateDoc(ref, { [track.id]: increment(1) });
-            } catch(e) { console.error("Erreur stats", e); }
-
+            await updateDoc(ref, { [track.id]: increment(1) });
             audio.src = track.url;
             audio.play();
             mainBtn.classList.add('playing');
@@ -202,7 +237,6 @@
             if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
             else { audio.pause(); mainBtn.classList.remove('playing'); }
         };
-
         window.nextTrack = () => window.jouer((currentIndex + 1) % currentTop5.length);
         window.prevTrack = () => window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length);
     </script>
