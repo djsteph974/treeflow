@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>TreeFlow Music</title>
+    <title>TreeFlow Music - Album</title>
     <style>
         body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .container { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
@@ -47,24 +47,47 @@
             <div class="share-btn" onclick="handleShare()"><svg width="26" height="26" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
             
             <div class="like-btn" onclick="handleLikeClick()">
-                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                <div id="like-counter">0</div>
+                <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <div id="like-counter">...</div>
             </div>
 
             <div class="jaquette-container" onclick="toggleLyrics()"></div>
-            <div id="track-info"><h2 id="current-title">TreeFlow Music</h2><p id="current-artist-album">Hanaé</p></div>
-            <div class="controls-container"><button id="play-pause-btn" onclick="togglePlay()"><svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button><input type="range" id="progress-bar" value="0" max="100"></div>
+            <div id="track-info"><h2 id="current-title">Chargement...</h2><p id="current-artist-album">Hanaé</p></div>
+            <div class="controls-container">
+                <button id="play-pause-btn" onclick="togglePlay()">
+                    <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <input type="range" id="progress-bar" value="0" max="100">
+            </div>
             <audio id="audio-element"></audio>
         </div>
         <div class="track-list" id="track-list"></div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
+            authDomain: "treeflow-music.firebaseapp.com",
+            projectId: "treeflow-music",
+            storageBucket: "treeflow-music.firebasestorage.app",
+            messagingSenderId: "330986852150",
+            appId: "1:330986852150:web:d57958930fa75b9504ad97"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const likeRef = doc(db, "stats", "album_une_chanson_douce");
+
         const playlist = [
-            { title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "J't'ai fait une chanson,\nune belle chanson\nMaman\nJ'ai gratté les cordes au médiator\nMaman\nSur ma guitare, j'y ai mis du cœur\nMaman\nPour que ça résonne, à toute heure\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nJ'ai joué du piano et du xylo\nMaman\nSorti mon stylo et mon micro\nMaman\nJ'ai mis mon casque sur les oreilles\nMaman\nJ'ai mis le paquet dans ma belle voix\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nGravé dans le noir, sur ce grand disque\nMaman\nPour toi je chante, je prends le risque\nMaman\nPose le diamant et écoute ma voix\nMaman\nC'est notre chanson, juste pour toi\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nDans cette pochette noire,\nun beau vinyle\nC'est pour toi maman" },
-            { title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "J't'ai fait un dessin, un beau dessin\nMaman je t'aime\nPlein de petites fleurs et de p'tits cœurs\nMaman je t'aime\nJ'ai fait un mouton tout blanc, tout rond\nMaman je t'aime\nAvec des p'tits yeux\ntout ronds, tout bleus\nMaman je t'aime\nMaman, maman, maman, maman\n\nY a des papillons tout en couleurs\nMaman je t'aime\nY a des papillons sur chaque fleur\nMaman je t'aime\nJ'en ai mis tout plein dans mon dessin\nMaman je t'aime\nEt en majuscules\ndans une grosse bulle\nMaman je t'aime\nMaman, maman, maman, maman\n\nJ'ai mis des bisous dans mon dessin\nMaman je t'aime\nJ'en ai mis partout dans mon dessin\nMaman je t'aime\nJ'ai mis tout autour tout mon amour\nMaman je t'aime\nUn petit ruban, joli ruban\nJe t'aime maman\nMaman, maman, maman, maman\nUn petit ruban, joli ruban\nJe t'aime maman" },
-            { title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie" },
-            { title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "Un souffle pur,\nau creux d'un grand silence,\nUn havre doux, une immense présence.\nDe ce refuge, jaillit un feu constant,\nUne chaleur, pour un élan vibrant.\n\nJe suis l'éclat, d'un soleil de printemps,\nJe trouve là, un amour de géant.\n\nVers cet éclat, court un fleuve de vie,\nUn chant puissant,\npour une force infinie.\nDans ce voyage,\ns'ouvre une seule maison,\nUne racine, au bout de l'horizon.\n\nJe deviens fleur, au creux de ce jardin,\nJe perds la peur, en serrant cette main.\n\nUn cycle pur, de la terre au sommet,\nJe reste là, pour la vie, à jamais.\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais." }
+            { title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "..." },
+            { title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "..." },
+            { title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "..." },
+            { title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "..." }
         ];
 
         const audio = document.getElementById('audio-element');
@@ -77,49 +100,37 @@
         const likeSvg = document.getElementById('like-svg');
         let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
 
-        const API_KEY = "dizzeur_v152_hanae";
-        const API_BASE = "https://api.countapi.xyz";
-
-        async function fetchLikes() {
-            try {
-                const res = await fetch(`${API_BASE}/get/${API_KEY}/likes`);
-                const data = await res.json();
-                if (data.value !== undefined) counterDisplay.innerText = data.value;
-                if (localStorage.getItem('dizzeur_liked')) likeSvg.style.fill = "#bc13fe";
-            } catch(e) { console.log("Erreur de lecture"); }
-        }
-
-        async function handleLikeClick() {
-            const isLiked = localStorage.getItem('dizzeur_liked');
-            const action = isLiked ? "update?amount=-1" : "hit";
-            
-            try {
-                const res = await fetch(`${API_BASE}/${action}/${API_KEY}/likes`);
-                const data = await res.json();
-                if (data.value !== undefined) {
-                    counterDisplay.innerText = data.value;
-                    if (isLiked) {
-                        localStorage.removeItem('dizzeur_liked');
-                        likeSvg.style.fill = "none";
-                    } else {
-                        localStorage.setItem('dizzeur_liked', 'true');
-                        likeSvg.style.fill = "#bc13fe";
-                    }
-                }
-            } catch(e) { 
-                let val = parseInt(counterDisplay.innerText);
-                counterDisplay.innerText = isLiked ? val - 1 : val + 1;
-                if (isLiked) { localStorage.removeItem('dizzeur_liked'); likeSvg.style.fill = "none"; }
-                else { localStorage.setItem('dizzeur_liked', 'true'); likeSvg.style.fill = "#bc13fe"; }
+        // --- GESTION DES LIKES FIREBASE ---
+        window.handleLikeClick = async () => {
+            if (!localStorage.getItem('liked_album_douce')) {
+                try {
+                    await updateDoc(likeRef, { count: increment(1) });
+                    localStorage.setItem('liked_album_douce', 'true');
+                    likeSvg.style.fill = "#bc13fe";
+                } catch(e) { console.error(e); }
+            } else {
+                alert("Déjà liké ! ❤️");
             }
+        };
+
+        onSnapshot(likeRef, (snap) => {
+            if (snap.exists()) {
+                counterDisplay.innerText = snap.data().count;
+            }
+        });
+
+        if (localStorage.getItem('liked_album_douce')) {
+            likeSvg.style.fill = "#bc13fe";
         }
 
-        function playTrack(index, startTime = 0) {
+        // --- LECTEUR AUDIO ---
+        window.playTrack = (index, startTime = 0) => {
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('dizzeur_index', currentIndex);
             currentTitle.classList.add('fade-out');
             currentArtistAlbum.classList.add('fade-out');
+            
             setTimeout(() => {
                 audio.src = track.url;
                 currentTitle.innerText = track.title;
@@ -127,85 +138,52 @@
                 currentTitle.classList.remove('fade-out');
                 currentArtistAlbum.classList.remove('fade-out');
                 audio.currentTime = startTime;
-
-                // Mise à jour de l'affichage Bluetooth / Écran de verrouillage
-                updateMediaSession(track);
-
                 if (startTime === 0 || !audio.paused) { 
                     audio.play(); 
                     iconPlay.style.display = "none"; 
                     iconPause.style.display = "block"; 
                 }
             }, 500);
-        }
+        };
 
-        function updateMediaSession(track) {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: 'Hanaé',
-                    album: track.album,
-                    artwork: [
-                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-
-                // Gestion des boutons physiques externes
-                navigator.mediaSession.setActionHandler('play', () => togglePlay());
-                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-                navigator.mediaSession.setActionHandler('previoustrack', () => {
-                    if (currentIndex > 0) playTrack(currentIndex - 1);
-                });
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1);
-                });
-            }
-        }
-
-        function togglePlay() { 
+        window.togglePlay = () => { 
             if (audio.paused) { 
                 audio.play(); 
                 iconPlay.style.display = "none"; 
                 iconPause.style.display = "block"; 
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
-            } 
-            else { 
+            } else { 
                 audio.pause(); 
                 iconPlay.style.display = "block"; 
                 iconPause.style.display = "none"; 
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
             }
-        }
+        };
 
-        function handleShare() { if (navigator.share) navigator.share({ title: 'TreeFlow Music', url: window.location.href }); }
+        window.toggleLyrics = () => {
+            const overlay = document.getElementById('lyrics-overlay');
+            if (overlay.style.display === 'block') overlay.style.display = 'none';
+            else { 
+                document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics; 
+                document.getElementById('lyrics-title').innerText = playlist[currentIndex].title; 
+                overlay.style.display = 'block'; 
+            }
+        };
 
+        window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music', url: window.location.href }); };
+
+        // --- INITIALISATION ---
+        const listDiv = document.getElementById('track-list');
         playlist.forEach((track, index) => {
             const div = document.createElement('div');
             div.className = 'track';
             div.innerHTML = `<div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé</p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a>`;
-            document.getElementById('track-list').appendChild(div);
+            listDiv.appendChild(div);
         });
 
         audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
+        audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.onload = () => { fetchLikes(); playTrack(currentIndex); };
-
-        function toggleLyrics() {
-            const overlay = document.getElementById('lyrics-overlay');
-            if (overlay.style.display === 'block') overlay.style.display = 'none';
-            else { document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics; document.getElementById('lyrics-title').innerText = playlist[currentIndex].title; overlay.style.display = 'block'; }
-        }
-        audio.onended = () => { if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1); };
-    </script>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('Service Worker enregistré !'))
-        .catch(err => console.log('Erreur SW: ', err));
-    });
-  }
+        window.onload = () => { window.playTrack(currentIndex); };
     </script>
 </body>
 </html>
