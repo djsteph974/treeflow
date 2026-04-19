@@ -110,27 +110,62 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Références Firebase
         const likeRef = doc(db, "stats", "likes");
-        const trackStatsRef = doc(db, "stats", "track_stats_douce"); // Document partagé avec l'album
+        const statsDouceRef = doc(db, "stats", "track_stats_douce");
+        const statsInstruRef = doc(db, "stats", "track_stats_douce_instru");
 
         const likeBtn = document.getElementById('btnLike');
         const audio = document.getElementById('audioPlayer');
         const mainBtn = document.getElementById('mainPlayBtn');
         const listContainer = document.getElementById('track-list');
 
-        const playlist = [
-            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3' },
-            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3' },
-            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3' },
-            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3' }
+        // Base de données complète pour le calcul du Top 5
+        const allTracks = [
+            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'normal' },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'normal' },
+            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal' },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal' },
+            { id: 'chanson_douce', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru' },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru' },
+            { id: 'bonne_fete', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru' },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru' }
         ];
 
+        let currentTop5 = [];
         let currentIndex = -1;
+        let statsData = { normal: {}, instru: {} };
+
+        // --- MISE À JOUR ET TRI DU TOP 5 ---
+        const updateDisplay = () => {
+            const scoredTracks = allTracks.map(track => ({
+                ...track,
+                plays: statsData[track.type][track.id] || 0
+            }));
+
+            // Tri par nombre d'écoutes décroissant
+            currentTop5 = scoredTracks.sort((a, b) => b.plays - a.plays).slice(0, 5);
+
+            listContainer.innerHTML = "";
+            currentTop5.forEach((t, i) => {
+                const activeClass = (currentIndex === i) ? 'active' : '';
+                listContainer.innerHTML += `
+                    <div class="track ${activeClass}" id="t-${i}" onclick="jouer(${i})">
+                        <span class="track-num">${i+1}</span>
+                        <span class="track-name">${t.title}</span>
+                    </div>`;
+            });
+        };
+
+        // --- ECOUTE DES STATS FIREBASE ---
+        onSnapshot(statsDouceRef, (snap) => {
+            if (snap.exists()) { statsData.normal = snap.data(); updateDisplay(); }
+        });
+        onSnapshot(statsInstruRef, (snap) => {
+            if (snap.exists()) { statsData.instru = snap.data(); updateDisplay(); }
+        });
 
         // --- SYNCHRO LIKES ---
         if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
-
         onSnapshot(likeRef, (snap) => {
             if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count;
         });
@@ -144,28 +179,22 @@
                 } catch (e) { console.error("Firebase Error", e); }
             }
         };
-        
         likeBtn.onclick = window.lancerLike;
 
-        // --- LOGIQUE LECTEUR + COMPTEUR SILENCIEUX ---
+        // --- LOGIQUE LECTEUR ---
         window.jouer = async (i) => {
-            if (currentIndex !== -1) {
-                const prev = document.getElementById(`t-${currentIndex}`);
-                if (prev) prev.classList.remove('active');
-            }
-            
             currentIndex = i;
-            const track = playlist[i];
+            const track = currentTop5[i];
             
-            // Mise à jour du compteur de vues (Silencieux)
+            const ref = track.type === 'normal' ? statsDouceRef : statsInstruRef;
             try {
-                await updateDoc(trackStatsRef, { [track.id]: increment(1) });
+                await updateDoc(ref, { [track.id]: increment(1) });
             } catch(e) { console.error("Erreur stats", e); }
 
             audio.src = track.url;
             audio.play();
-            document.getElementById(`t-${i}`).classList.add('active');
             mainBtn.classList.add('playing');
+            updateDisplay(); 
         };
 
         window.togglePlay = () => {
@@ -174,17 +203,8 @@
             else { audio.pause(); mainBtn.classList.remove('playing'); }
         };
 
-        window.nextTrack = () => window.jouer((currentIndex + 1) % playlist.length);
-        window.prevTrack = () => window.jouer((currentIndex - 1 + playlist.length) % playlist.length);
-
-        // --- GÉNÉRATION LISTE ---
-        playlist.forEach((t, i) => {
-            listContainer.innerHTML += `
-                <div class="track" id="t-${i}" onclick="jouer(${i})">
-                    <span class="track-num">${i+1}</span>
-                    <span class="track-name">${t.title}</span>
-                </div>`;
-        });
+        window.nextTrack = () => window.jouer((currentIndex + 1) % currentTop5.length);
+        window.prevTrack = () => window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length);
     </script>
 </body>
 </html>
