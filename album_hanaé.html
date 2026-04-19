@@ -11,11 +11,9 @@
         .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; overflow: hidden; }
         .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
         .share-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 10; }
-        
         .like-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; z-index: 10; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s; }
         .like-btn:active { transform: scale(1.2); }
         #like-counter { font-size: 12px; color: #bc13fe; margin-top: 2px; font-weight: bold; }
-
         .jaquette-container { width: 50%; aspect-ratio: 1/1; margin: 10px auto; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; background-position: center; border: 2px solid #bc13fe; cursor: pointer; position: relative; z-index: 1; }
         #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
         #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
@@ -30,7 +28,8 @@
         .track { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .track-info-text { cursor: pointer; flex-grow: 1; }
         .track h3 { margin: 0 0 5px 0; font-size: 16px; }
-        .track p { margin: 0; font-size: 12px; color: #bc13fe; }
+        .track p { margin: 0; font-size: 12px; color: #bc13fe; display: flex; align-items: center; gap: 8px; }
+        .play-count { color: #888; font-size: 11px; font-style: italic; }
         .download-btn { background: none; border: none; cursor: pointer; padding: 5px; }
         .download-btn svg { width: 24px; height: 24px; fill: #bc13fe; }
         #lyrics-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
@@ -45,12 +44,10 @@
         <div class="header-sticky">
             <div class="header-sticky-blur"></div>
             <div class="share-btn" onclick="handleShare()"><svg width="26" height="26" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
-            
             <div class="like-btn" onclick="handleLikeClick()">
                 <svg id="like-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#bc13fe" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <div id="like-counter">...</div>
             </div>
-
             <div class="jaquette-container" onclick="toggleLyrics()"></div>
             <div id="track-info"><h2 id="current-title">Chargement...</h2><p id="current-artist-album">Hanaé</p></div>
             <div class="controls-container">
@@ -69,7 +66,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
             authDomain: "treeflow-music.firebaseapp.com",
@@ -82,12 +78,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const likeRef = doc(db, "stats", "album_une_chanson_douce");
+        const trackStatsRef = doc(db, "stats", "track_stats_douce");
 
         const playlist = [
-            { title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "..." },
-            { title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "..." },
-            { title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "..." },
-            { title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "..." }
+            { id: 'bonne_fete', title: 'Bonne Fête Maman', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', lyrics: "..." },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', lyrics: "..." },
+            { id: 'chanson_douce', title: 'Une Chanson Douce', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', lyrics: "..." },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur', album: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', lyrics: "..." }
         ];
 
         const audio = document.getElementById('audio-element');
@@ -100,7 +97,19 @@
         const likeSvg = document.getElementById('like-svg');
         let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
 
-        // --- GESTION DES LIKES FIREBASE ---
+        // --- SYNCHRO TEMPS RÉEL ---
+        onSnapshot(likeRef, (snap) => { if (snap.exists()) counterDisplay.innerText = snap.data().count; });
+        
+        onSnapshot(trackStatsRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                playlist.forEach(track => {
+                    const el = document.getElementById(`count-${track.id}`);
+                    if (el) el.innerText = `${data[track.id] || 0} écoutes`;
+                });
+            }
+        });
+
         window.handleLikeClick = async () => {
             if (!localStorage.getItem('liked_album_douce')) {
                 try {
@@ -108,35 +117,27 @@
                     localStorage.setItem('liked_album_douce', 'true');
                     likeSvg.style.fill = "#bc13fe";
                 } catch(e) { console.error(e); }
-            } else {
-                alert("Déjà liké ! ❤️");
             }
         };
 
-        onSnapshot(likeRef, (snap) => {
-            if (snap.exists()) {
-                counterDisplay.innerText = snap.data().count;
-            }
-        });
+        if (localStorage.getItem('liked_album_douce')) likeSvg.style.fill = "#bc13fe";
 
-        if (localStorage.getItem('liked_album_douce')) {
-            likeSvg.style.fill = "#bc13fe";
-        }
-
-        // --- LECTEUR AUDIO ---
-        window.playTrack = (index, startTime = 0) => {
+        // --- LOGIQUE LECTEUR ---
+        window.playTrack = async (index, startTime = 0) => {
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('dizzeur_index', currentIndex);
             currentTitle.classList.add('fade-out');
-            currentArtistAlbum.classList.add('fade-out');
             
+            try {
+                await updateDoc(trackStatsRef, { [track.id]: increment(1) });
+            } catch(e) { console.error("Erreur stats", e); }
+
             setTimeout(() => {
                 audio.src = track.url;
                 currentTitle.innerText = track.title;
                 currentArtistAlbum.innerText = "Hanaé - " + track.album;
                 currentTitle.classList.remove('fade-out');
-                currentArtistAlbum.classList.remove('fade-out');
                 audio.currentTime = startTime;
                 if (startTime === 0 || !audio.paused) { 
                     audio.play(); 
@@ -147,15 +148,8 @@
         };
 
         window.togglePlay = () => { 
-            if (audio.paused) { 
-                audio.play(); 
-                iconPlay.style.display = "none"; 
-                iconPause.style.display = "block"; 
-            } else { 
-                audio.pause(); 
-                iconPlay.style.display = "block"; 
-                iconPause.style.display = "none"; 
-            }
+            if (audio.paused) { audio.play(); iconPlay.style.display = "none"; iconPause.style.display = "block"; } 
+            else { audio.pause(); iconPlay.style.display = "block"; iconPause.style.display = "none"; }
         };
 
         window.toggleLyrics = () => {
@@ -170,12 +164,19 @@
 
         window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music', url: window.location.href }); };
 
-        // --- INITIALISATION ---
+        // --- GÉNÉRATION LISTE ---
         const listDiv = document.getElementById('track-list');
         playlist.forEach((track, index) => {
             const div = document.createElement('div');
             div.className = 'track';
-            div.innerHTML = `<div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé</p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a>`;
+            div.innerHTML = `
+                <div class="track-info-text" onclick="playTrack(${index})">
+                    <h3>${track.title}</h3>
+                    <p>Hanaé <span class="play-count" id="count-${track.id}">0 écoutes</span></p>
+                </div>
+                <a href="${track.url}" download class="download-btn">
+                    <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>
+                </a>`;
             listDiv.appendChild(div);
         });
 
@@ -183,7 +184,7 @@
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.onload = () => { window.playTrack(currentIndex); };
+        window.onload = () => { window.playTrack(currentIndex, 0); };
     </script>
 </body>
 </html>
