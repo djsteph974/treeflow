@@ -3,204 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hanaé - Une Chanson Douce</title>
+    <title>Hanaé - TreeFlow Music</title>
     <style>
-        :root {
-            --violet: #cc00ff;
-            --rose: #ff00cc;
-        }
+        :root { --violet: #cc00ff; --rose: #ff00cc; --noir: #000; }
+        body { background-color: var(--noir); color: #fff; font-family: sans-serif; margin: 0; padding-bottom: 60px; }
+        .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
+        .header { padding: 15px 20px; }
+        h1 { font-size: 3rem; margin: 0; font-weight: 900; }
+        
+        .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
+        .btn-like { background: rgba(30,0,50,0.9); border: 1px solid var(--violet); border-radius: 25px; padding: 10px 20px; color: var(--violet); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        .player-controls { display: flex; align-items: center; gap: 15px; }
+        .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .btn-play-main.playing::before { content: 'II'; }
+        .btn-play-main:not(.playing)::before { content: '▶'; margin-left: 4px; }
 
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            padding-bottom: 50px;
-        }
-
-        .top-banner {
-            width: 100%;
-            display: block;
-        }
-
-        .header {
-            height: auto;
-            display: flex;
-            align-items: flex-end;
-            padding: 10px 20px;
-            background-color: #000;
-            position: relative;
-            z-index: 5;
-        }
-
-        h1 { 
-            font-size: 3rem; 
-            margin: 0; 
-            font-weight: 900; 
-            line-height: 1;
-        }
-
-        /* ACTIONS & CONTRÔLES */
-        .actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 25px;
-            margin-top: 10px; 
-            position: relative;
-            z-index: 10;
-        }
-
-        .player-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn-control {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .btn-control:active { color: var(--violet); }
-
-        .btn-play-main {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--violet), var(--rose));
-            border: none;
-            color: transparent;
-            font-size: 0;
-            box-shadow: 0 0 20px rgba(204, 0, 255, 0.4);
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-            position: relative;
-        }
-
-        .btn-play-main::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 10px 0 10px 18px;
-            border-color: transparent transparent transparent #ffffff;
-            margin-left: 4px;
-        }
-
-        .btn-play-main.playing::after { display: none; }
-
-        .btn-play-main.playing::before {
-            content: '';
-            position: absolute;
-            display: block;
-            width: 18px;
-            height: 22px;
-            background: repeating-linear-gradient(to right, #ffffff, #ffffff 6px, transparent 6px, transparent 12px, #ffffff 12px, #ffffff 18px);
-        }
-
-        .btn-play-main:active { transform: scale(0.92); }
-
-        .btn-like {
-            background: rgba(30, 0, 50, 0.9);
-            border: 1px solid var(--violet);
-            border-radius: 20px;
-            padding: 8px 18px;
-            color: var(--violet);
-            font-weight: bold;
-        }
-
-        /* LISTE DES TITRES */
-        section { padding: 30px 20px 10px 20px; }
-        h2 { color: var(--violet); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px; margin-bottom: 15px; }
-
-        .track {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            margin-bottom: 10px;
-            padding: 14px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .track.active {
-            background: rgba(204, 0, 255, 0.1);
-            border-color: var(--violet);
-            box-shadow: 0 0 15px rgba(204, 0, 255, 0.3);
-        }
-
+        section { padding: 30px 20px 10px; }
+        h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; }
+        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; }
+        .track.active { background: rgba(204, 0, 255, 0.15); border-color: var(--violet); }
         .track-num { color: var(--violet); width: 30px; font-weight: 900; }
-        .track-name { flex: 1; font-weight: 500; }
-
-        /* DISCOGRAPHIE AVEC DÉFILEMENT */
-        .album-scroll-container {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            padding-bottom: 15px;
-            scrollbar-width: none; /* Firefox */
-        }
-
-        .album-scroll-container::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
-        }
-
-        .album-link {
-            text-decoration: none;
-            color: inherit;
-            display: inline-block;
-            flex: 0 0 170px; /* Taille fixe pour le défilement */
-        }
-
-        .album-card { width: 170px; margin-top: 10px; }
-        .cover {
-            width: 170px;
-            height: 170px;
-            border-radius: 18px;
-            background: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI');
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: flex-end;
-            align-items: flex-end;
-            padding: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s;
-        }
-
-        .album-card:active .cover { transform: scale(0.98); }
-
-        .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: #fff; }
-        .album-title { font-weight: bold; margin-top: 12px; display: block; line-height: 1.2; }
+        
+        .album-scroll-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; }
+        .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; }
+        .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
 
-    <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" alt="Bannière" class="top-banner">
-
-    <div class="header">
-        <h1>Hanaé</h1>
-    </div>
+    <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
+    <div class="header"><h1>Hanaé</h1></div>
 
     <div class="actions">
-        <div class="btn-like">❤️ 1.2k</div>
-        
+        <div class="btn-like" id="btnLike">
+            ❤️ <span id="likeCount">...</span>
+        </div>
         <div class="player-controls">
             <button class="btn-control" onclick="prevTrack()">⏮</button>
-            <button class="btn-play-main" id="mainPlayBtn" onclick="togglePlay()">▶</button>
+            <button class="btn-play-main" id="mainPlayBtn" onclick="togglePlay()"></button>
             <button class="btn-control" onclick="nextTrack()">⏭</button>
         </div>
     </div>
@@ -209,42 +52,55 @@
 
     <section>
         <h2>Les plus écoutés</h2>
-        <div class="track" id="track-0" onclick="jouer(0)">
-            <span class="track-num">1</span>
-            <span class="track-name">Une Chanson Douce</span>
-        </div>
-        <div class="track" id="track-1" onclick="jouer(1)">
-            <span class="track-num">2</span>
-            <span class="track-name">La Grâce de la Fleur</span>
-        </div>
-        <div class="track" id="track-2" onclick="jouer(2)">
-            <span class="track-num">3</span>
-            <span class="track-name">Bonne Fête Maman</span>
-        </div>
-        <div class="track" id="track-3" onclick="jouer(3)">
-            <span class="track-num">4</span>
-            <span class="track-name">Maman je t'aime</span>
-        </div>
+        <div id="track-list"></div>
     </section>
 
     <section>
         <h2>Discographie</h2>
         <div class="album-scroll-container">
-            <a href="album_hanaé.html" class="album-link">
-                <div class="album-card">
-                    <div class="cover"><div class="mini-play">▶</div></div>
-                    <span class="album-title">Une Chanson Douce</span>
-                </div>
-            </a>
-
-            <a href="album_hanaé_instru.html" class="album-link">
-                <div class="album-card">
-                    <div class="cover"><div class="mini-play">▶</div></div>
-                    <span class="album-title">Une Chanson Douce - Instru</span>
-                </div>
-            </a>
+            <div class="album-card">
+                <div class="cover"><div class="mini-play">▶</div></div>
+                <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce</span>
+            </div>
+            <div class="album-card">
+                <div class="cover"><div class="mini-play">▶</div></div>
+                <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce - Instru</span>
+            </div>
         </div>
     </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
+            authDomain: "treeflow-music.firebaseapp.com",
+            projectId: "treeflow-music",
+            storageBucket: "treeflow-music.firebasestorage.app",
+            messagingSenderId: "330986852150",
+            appId: "1:330986852150:web:d57958930fa75b9504ad97"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const likeRef = doc(db, "stats", "likes");
+
+        // Écouter les likes en temps réel
+        onSnapshot(likeRef, (docSnap) => {
+            if (docSnap.exists()) {
+                document.getElementById('likeCount').innerText = docSnap.data().count;
+            }
+        });
+
+        // Fonction pour ajouter un like (attachée à la fenêtre pour être accessible via onclick)
+        window.ajouterLike = async () => {
+            await updateDoc(likeRef, {
+                count: increment(1)
+            });
+        };
+        document.getElementById('btnLike').onclick = window.ajouterLike;
+    </script>
 
     <script>
         const playlist = [
@@ -257,50 +113,29 @@
         let currentTrackIndex = -1;
         const player = document.getElementById('audioPlayer');
         const mainBtn = document.getElementById('mainPlayBtn');
+        const list = document.getElementById('track-list');
 
-        function jouer(index) {
-            if (index < 0 || index >= playlist.length) return;
-            if (currentTrackIndex !== -1) {
-                document.getElementById(`track-${currentTrackIndex}`).classList.remove('active');
-            }
-            currentTrackIndex = index;
-            player.src = playlist[currentTrackIndex].url;
+        playlist.forEach((t, i) => {
+            list.innerHTML += `<div class="track" id="track-${i}" onclick="jouer(${i})"><span class="track-num">${i+1}</span><span>${t.title}</span></div>`;
+        });
+
+        window.jouer = (i) => {
+            if (currentTrackIndex !== -1) document.getElementById(`track-${currentTrackIndex}`).classList.remove('active');
+            currentTrackIndex = i;
+            player.src = playlist[i].url;
             player.play();
-            document.getElementById(`track-${currentTrackIndex}`).classList.add('active');
+            document.getElementById(`track-${i}`).classList.add('active');
             mainBtn.classList.add('playing');
-        }
+        };
 
-        function togglePlay() {
-            if (currentTrackIndex === -1) {
-                jouer(0);
-                return;
-            }
-            if (player.paused) {
-                player.play();
-                mainBtn.classList.add('playing');
-            } else {
-                player.pause();
-                mainBtn.classList.remove('playing');
-            }
-        }
+        window.togglePlay = () => {
+            if (currentTrackIndex === -1) { jouer(0); return; }
+            if (player.paused) { player.play(); mainBtn.classList.add('playing'); }
+            else { player.pause(); mainBtn.classList.remove('playing'); }
+        };
 
-        function nextTrack() {
-            let next = currentTrackIndex + 1;
-            if (next < playlist.length) {
-                jouer(next);
-            } else {
-                jouer(0);
-            }
-        }
-
-        function prevTrack() {
-            let prev = currentTrackIndex - 1;
-            if (prev >= 0) {
-                jouer(prev);
-            } else {
-                jouer(playlist.length - 1);
-            }
-        }
+        window.nextTrack = () => jouer((currentTrackIndex + 1) % playlist.length);
+        window.prevTrack = () => jouer((currentTrackIndex - 1 + playlist.length) % playlist.length);
     </script>
 </body>
 </html>
