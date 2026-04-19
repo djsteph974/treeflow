@@ -97,7 +97,7 @@
         const likeSvg = document.getElementById('like-svg');
         let currentIndex = parseInt(localStorage.getItem('instru_index')) || 0;
 
-        // --- TEMPS RÉEL : LIKES & ÉCOUTES ---
+        // --- SYNCHRO TEMPS RÉEL ---
         onSnapshot(likeRef, (snap) => { if (snap.exists()) counterDisplay.innerText = snap.data().count; });
         
         onSnapshot(trackStatsRef, (snap) => {
@@ -127,24 +127,31 @@
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('instru_index', currentIndex);
-            currentTitle.classList.add('fade-out');
             
-            // Incrémenter le compteur de lecture dans Firebase
+            // 1. Incrémentation immédiate dans Firebase
             try {
                 await updateDoc(trackStatsRef, { [track.id]: increment(1) });
             } catch(e) { console.error("Erreur stats", e); }
 
+            // 2. Interface
+            currentTitle.classList.add('fade-out');
+            
             setTimeout(() => {
                 audio.src = track.url;
                 currentTitle.innerText = track.title;
                 currentArtistAlbum.innerText = "Hanaé - " + track.album;
                 currentTitle.classList.remove('fade-out');
                 audio.currentTime = startTime;
-                if (startTime === 0 || !audio.paused) { 
-                    audio.play(); 
+
+                // 3. Lecture avec gestion d'erreur (autoplay block)
+                audio.play().then(() => {
                     iconPlay.style.display = "none"; 
                     iconPause.style.display = "block"; 
-                }
+                }).catch(e => {
+                    console.log("Autoplay bloqué, attente clic utilisateur.");
+                    iconPlay.style.display = "block"; 
+                    iconPause.style.display = "none";
+                });
             }, 500);
         };
 
@@ -184,7 +191,10 @@
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.onload = () => { window.playTrack(currentIndex, 0); };
+        // Démarrage au chargement
+        window.addEventListener('load', () => {
+            window.playTrack(currentIndex, 0);
+        });
     </script>
 </body>
 </html>

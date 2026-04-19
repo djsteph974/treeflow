@@ -127,23 +127,32 @@
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('dizzeur_index', currentIndex);
-            currentTitle.classList.add('fade-out');
             
+            // 1. Incrémentation immédiate du compteur Firebase
             try {
                 await updateDoc(trackStatsRef, { [track.id]: increment(1) });
             } catch(e) { console.error("Erreur stats", e); }
 
+            // 2. Mise à jour de l'interface
+            currentTitle.classList.add('fade-out');
+            
             setTimeout(() => {
                 audio.src = track.url;
                 currentTitle.innerText = track.title;
                 currentArtistAlbum.innerText = "Hanaé - " + track.album;
                 currentTitle.classList.remove('fade-out');
                 audio.currentTime = startTime;
-                if (startTime === 0 || !audio.paused) { 
-                    audio.play(); 
+
+                // 3. Gestion de la lecture (auto ou manuelle)
+                audio.play().then(() => {
                     iconPlay.style.display = "none"; 
-                    iconPause.style.display = "block"; 
-                }
+                    iconPause.style.display = "block";
+                }).catch(error => {
+                    // Si le navigateur bloque l'autoplay, on reste en mode pause visuellement
+                    console.log("Lecture en attente d'interaction utilisateur.");
+                    iconPlay.style.display = "block"; 
+                    iconPause.style.display = "none";
+                });
             }, 500);
         };
 
@@ -184,7 +193,10 @@
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.onload = () => { window.playTrack(currentIndex, 0); };
+        // Lancement au chargement de la page
+        window.addEventListener('load', () => {
+            window.playTrack(currentIndex, 0);
+        });
     </script>
 </body>
 </html>
