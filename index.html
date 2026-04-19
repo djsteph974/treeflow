@@ -6,62 +6,73 @@
     <title>Hanaé - TreeFlow Music</title>
     <style>
         :root { --violet: #cc00ff; --rose: #ff00cc; --noir: #000; }
-        body { background-color: var(--noir); color: #fff; font-family: sans-serif; margin: 0; padding-bottom: 60px; }
+        body { background-color: var(--noir); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        
+        /* BANNIÈRE ORIGINALE RÉTABLIE */
         .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
+        
         .header { padding: 15px 20px; }
-        h1 { font-size: 3rem; margin: 0; font-weight: 900; }
+        h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
         
         .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
         
-        /* Style du bouton Like */
         .btn-like { 
             background: rgba(30,0,50,0.9); 
-            border: 1px solid var(--violet); 
+            border: 2px solid var(--violet); 
             border-radius: 25px; 
-            padding: 10px 20px; 
+            padding: 10px 22px; 
             color: var(--violet); 
             font-weight: bold; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             gap: 8px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        /* Style quand déjà liké */
         .btn-like.liked {
             background: var(--rose);
             border-color: var(--rose);
             color: white;
-            box-shadow: 0 0 15px rgba(255, 0, 204, 0.4);
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
+            transform: scale(1.05);
         }
         
         .player-controls { display: flex; align-items: center; gap: 15px; }
         .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-        .btn-play-main.playing::before { content: 'II'; }
+        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(204, 0, 255, 0.4); }
+        .btn-play-main.playing::before { content: 'II'; font-weight: bold; }
         .btn-play-main:not(.playing)::before { content: '▶'; margin-left: 4px; }
 
         section { padding: 30px 20px 10px; }
-        h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; }
-        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; }
+        h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; opacity: 0.8; }
+        
+        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
         .track.active { background: rgba(204, 0, 255, 0.15); border-color: var(--violet); }
         .track-num { color: var(--violet); width: 30px; font-weight: 900; }
-        
+        .track-name { flex: 1; font-weight: 500; }
+
         .album-scroll-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
-        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; }
-        .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; }
+        .album-scroll-container::-webkit-scrollbar { display: none; }
+        
+        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; }
+        
+        /* COVERS AVEC IMAGE ORIGINALE (ROND) RÉTABLIES */
+        .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
 
     <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
+    
     <div class="header"><h1>Hanaé</h1></div>
 
     <div class="actions">
         <div class="btn-like" id="btnLike">
-            ❤️ <span id="likeCount">...</span>
+            <span id="heartIcon">❤️</span> <span id="likeCount">...</span>
         </div>
+        
         <div class="player-controls">
             <button class="btn-control" onclick="prevTrack()">⏮</button>
             <button class="btn-play-main" id="mainPlayBtn" onclick="togglePlay()"></button>
@@ -79,14 +90,14 @@
     <section>
         <h2>Discographie</h2>
         <div class="album-scroll-container">
-            <div class="album-card">
+            <a href="album_hanaé.html" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce</span>
-            </div>
-            <div class="album-card">
+            </a>
+            <a href="album_hanaé_instru.html" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce - Instru</span>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -106,35 +117,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const likeRef = doc(db, "stats", "likes");
-        const likeBtnElement = document.getElementById('btnLike');
+        const likeBtn = document.getElementById('btnLike');
 
-        // Vérification immédiate au chargement pour le style du bouton
-        if(localStorage.getItem('has_liked_hanae')) {
-            likeBtnElement.classList.add('liked');
+        if(localStorage.getItem('hanae_liked')) {
+            likeBtn.classList.add('liked');
         }
 
-        // Écouter les likes en temps réel
-        onSnapshot(likeRef, (docSnap) => {
-            if (docSnap.exists()) {
-                document.getElementById('likeCount').innerText = docSnap.data().count;
+        onSnapshot(likeRef, (snap) => {
+            if (snap.exists()) {
+                document.getElementById('likeCount').innerText = snap.data().count;
             }
         });
 
-        // Fonction Like sécurisée
-        window.ajouterLike = async () => {
-            if (!localStorage.getItem('has_liked_hanae')) {
+        window.lancerLike = async () => {
+            if (!localStorage.getItem('hanae_liked')) {
                 try {
                     await updateDoc(likeRef, { count: increment(1) });
-                    localStorage.setItem('has_liked_hanae', 'true');
-                    likeBtnElement.classList.add('liked');
-                } catch (e) {
-                    console.error("Erreur:", e);
-                }
+                    localStorage.setItem('hanae_liked', 'true');
+                    likeBtn.classList.add('liked');
+                } catch (e) { console.error("Firebase Error", e); }
             } else {
                 alert("Vous avez déjà liké ! ❤️");
             }
         };
-        likeBtnElement.onclick = window.ajouterLike;
+        
+        likeBtn.onclick = window.lancerLike;
     </script>
 
     <script>
@@ -145,32 +152,36 @@
             { title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3' }
         ];
 
-        let currentTrackIndex = -1;
-        const player = document.getElementById('audioPlayer');
+        let currentIndex = -1;
+        const audio = document.getElementById('audioPlayer');
         const mainBtn = document.getElementById('mainPlayBtn');
-        const list = document.getElementById('track-list');
+        const listContainer = document.getElementById('track-list');
 
         playlist.forEach((t, i) => {
-            list.innerHTML += `<div class="track" id="track-${i}" onclick="jouer(${i})"><span class="track-num">${i+1}</span><span>${t.title}</span></div>`;
+            listContainer.innerHTML += `
+                <div class="track" id="t-${i}" onclick="jouer(${i})">
+                    <span class="track-num">${i+1}</span>
+                    <span class="track-name">${t.title}</span>
+                </div>`;
         });
 
         window.jouer = (i) => {
-            if (currentTrackIndex !== -1) document.getElementById(`track-${currentTrackIndex}`).classList.remove('active');
-            currentTrackIndex = i;
-            player.src = playlist[i].url;
-            player.play();
-            document.getElementById(`track-${i}`).classList.add('active');
+            if (currentIndex !== -1) document.getElementById(`t-${currentIndex}`).classList.remove('active');
+            currentIndex = i;
+            audio.src = playlist[i].url;
+            audio.play();
+            document.getElementById(`t-${i}`).classList.add('active');
             mainBtn.classList.add('playing');
         };
 
         window.togglePlay = () => {
-            if (currentTrackIndex === -1) { jouer(0); return; }
-            if (player.paused) { player.play(); mainBtn.classList.add('playing'); }
-            else { player.pause(); mainBtn.classList.remove('playing'); }
+            if (currentIndex === -1) { jouer(0); return; }
+            if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
+            else { audio.pause(); mainBtn.classList.remove('playing'); }
         };
 
-        window.nextTrack = () => jouer((currentTrackIndex + 1) % playlist.length);
-        window.prevTrack = () => jouer((currentTrackIndex - 1 + playlist.length) % playlist.length);
+        window.nextTrack = () => jouer((currentIndex + 1) % playlist.length);
+        window.prevTrack = () => jouer((currentIndex - 1 + playlist.length) % playlist.length);
     </script>
 </body>
 </html>
