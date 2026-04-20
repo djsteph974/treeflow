@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hanaé - TreeFlow Music</title>
     <style>
@@ -92,11 +95,11 @@
     <section>
         <h2>Discographie</h2>
         <div class="album-scroll-container">
-            <a href="album_hanaé.html" class="album-card">
+            <a href="album_hanaé.html?v=1" id="link-album" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce</span>
             </a>
-            <a href="album_hanaé_instru.html" class="album-card">
+            <a href="album_hanaé_instru.html?v=1" id="link-instru" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce - Instru</span>
             </a>
@@ -184,34 +187,23 @@
         btnSend.onclick = async () => {
             const pseudo = pseudoInput.value.trim();
             const text = commentInput.value.trim();
-            
-            if(!pseudo || !text) { alert("Merci d'entrer un pseudo et un message !"); return; }
-
+            if(!pseudo || !text) return;
             try {
-                await addDoc(commentsCol, {
-                    author: pseudo,
-                    content: text,
-                    timestamp: Date.now()
-                });
+                await addDoc(commentsCol, { author: pseudo, content: text, timestamp: Date.now() });
                 commentInput.value = "";
             } catch(e) { console.error(e); }
         };
 
-        // Lecture temps réel des 10 derniers messages
         const q = query(commentsCol, orderBy("timestamp", "desc"), limit(10));
         onSnapshot(q, (snap) => {
             commentsList.innerHTML = "";
             snap.forEach(doc => {
                 const c = doc.data();
-                commentsList.innerHTML += `
-                    <div class="comment-item">
-                        <b>${c.author}</b>
-                        <p>${c.content}</p>
-                    </div>`;
+                commentsList.innerHTML += `<div class="comment-item"><b>${c.author}</b><p>${c.content}</p></div>`;
             });
         });
 
-        // --- LOGIQUE LECTEUR & LIKES ---
+        // --- LIKES ---
         likeBtn.onclick = async () => {
             if (!localStorage.getItem('hanae_liked')) {
                 await updateDoc(likeRef, { count: increment(1) });
@@ -221,6 +213,7 @@
         };
         if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
 
+        // --- LECTEUR ---
         window.jouer = async (i) => {
             currentIndex = i;
             const track = currentTop5[i];
@@ -237,8 +230,28 @@
             if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
             else { audio.pause(); mainBtn.classList.remove('playing'); }
         };
-        window.nextTrack = () => window.jouer((currentIndex + 1) % currentTop5.length);
-        window.prevTrack = () => window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length);
+        window.nextTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex + 1) % currentTop5.length); };
+        window.prevTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length); };
+
+        // --- ANTI-VEILLE (WAKE LOCK) ---
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) { console.log("Wake Lock error:", err.message); }
+        };
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock();
+        });
+
+        window.addEventListener('load', () => {
+            const timestamp = Date.now();
+            document.getElementById('link-album').href = "album_hanaé.html?v=" + timestamp;
+            document.getElementById('link-instru').href = "album_hanaé_instru.html?v=" + timestamp;
+            requestWakeLock();
+        });
     </script>
 </body>
 </html>
