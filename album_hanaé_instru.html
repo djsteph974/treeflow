@@ -12,16 +12,13 @@
         .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; }
         .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
         
-        /* Navigation Gauche */
-        .back-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 110; display: flex; align-items: center; justify-content: center; }
+        .back-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
         
-        /* Colonne Actions Droite */
         .actions-right { position: absolute; top: 15px; right: 15px; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 110; }
         
         .like-btn { cursor: pointer; display: flex; flex-direction: column; align-items: center; width: 44px; transition: transform 0.2s; }
         .like-btn:active { transform: scale(1.2); }
         
-        /* FIX COEUR : Zone de sécurité large pour le tracé */
         #like-svg { width: 30px; height: 30px; overflow: visible !important; }
         #like-counter { font-size: 12px; color: #bc13fe; margin-top: 2px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
         
@@ -32,8 +29,7 @@
         #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
         #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
         #current-artist-album { font-size: 14px; margin: 0; color: #bc13fe; transition: opacity 0.5s; }
-        .fade-out { opacity: 0; }
-
+        
         .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
         #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
         #play-pause-btn svg { width: 22px; height: 22px; fill: white; }
@@ -54,11 +50,7 @@
     </style>
 </head>
 <body>
-    <div id="lyrics-overlay">
-        <span class="close-lyrics" onclick="toggleLyrics()">×</span>
-        <h2 id="lyrics-title" style="color: #bc13fe;"></h2>
-        <div id="lyrics-content"></div>
-    </div>
+    <div id="lyrics-overlay"><span class="close-lyrics" onclick="toggleLyrics()">×</span><h2 id="lyrics-title" style="color: #bc13fe;">Paroles</h2><div id="lyrics-content"></div></div>
     
     <div class="container">
         <div class="header-sticky">
@@ -117,25 +109,29 @@
             { 
                 id: 'bonne_fete', 
                 title: 'Bonne Fête Maman (Instru)', 
-                url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3',
-                lyrics: "J't'ai fait une chanson,\nune belle chanson\nMaman\nJ'ai gratté les cordes au médiator\nMaman\nSur ma guitare, j'y ai mis du cœur\nMaman\nPour que ça résonne, à toute heure\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nJ'ai joué du piano et du xylo\nMaman\nSorti mon stylo et mon micro\nMaman\nJ'ai mis mon casque sur les oreilles\nMaman\nJ'ai mis le paquet dans ma belle voix\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nGravé dans le noir, sur ce grand disque\nMaman\nPour toi je chante, je prends le risque\nMaman\nPose le diamant et écoute ma voix\nMaman\nC'est notre chanson, juste pour toi\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nDans cette pochette noire,\nun beau vinyle\nC'est pour toi maman"
+                album: 'Une Chanson Douce (Instru)', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', 
+                lyrics: "J't'ai fait une chanson,\nune belle chanson\nMaman\nJ'ai gratté les cordes au médiator\nMaman\nSur ma guitare, j'y ai mis du cœur\nMaman\nPour que ça résonne, à toute heure\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nJ'ai joué du piano et du xylo\nMaman\nSorti mon stylo et mon micro\nMaman\nJ'ai mis mon casque sur les oreilles\nMaman\nJ'ai mis le paquet dans ma belle voix\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nGravé dans le noir, sur ce grand disque\nMaman\nPour toi je chante, je prends le risque\nMaman\nPose le diamant et écoute ma voix\nMaman\nC'est notre chanson, juste pour toi\nMaman\n\nJe te souhaite\nune bonne fête des mamans\nMonte le son à fond du tourne-disque\nJe te souhaite\nune bonne fête des mamans\nJe t'aime très fort,\nfort comme ma musique\n\nDans cette pochette noire,\nun beau vinyle\nC'est pour toi maman" 
             },
             { 
                 id: 'maman_je_taime', 
                 title: 'Maman Je t\'aime (Instru)', 
-                url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3',
+                album: 'Une Chanson Douce (Instru)', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', 
                 lyrics: "J't'ai fait un dessin, un beau dessin\nMaman je t'aime\nPlein de petites fleurs et de p'tits cœurs\nMaman je t'aime\nJ'ai fait un mouton tout blanc, tout rond\nMaman je t'aime\nAvec des p'tits yeux\ntout ronds, tout bleus\nMaman je t'aime\nMaman, maman, maman, maman\n\nY a des papillons tout en couleurs\nMaman je t'aime\nY a des papillons sur chaque fleur\nMaman je t'aime\nJ'en ai mis tout plein dans mon dessin\nMaman je t'aime\nEt en majuscules\ndans une grosse bulle\nMaman je t'aime\nMaman, maman, maman, maman\n\nJ'ai mis des bisous dans mon dessin\nMaman je t'aime\nJ'en ai mis partout dans mon dessin\nMaman je t'aime\nJ'ai mis tout autour tout mon amour\nMaman je t'aime\nUn petit ruban, joli ruban\nJe t'aime maman\nMaman, maman, maman, maman\nUn petit ruban, joli ruban\nJe t'aime maman"
             },
             { 
                 id: 'chanson_douce', 
                 title: 'Une Chanson Douce (Instru)', 
-                url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3',
-                lyrics: "Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie"
+                album: 'Une Chanson Douce (Instru)', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', 
+                lyrics:"Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie"
             },
             { 
                 id: 'grace_fleur', 
                 title: 'La Grâce de la Fleur (Instru)', 
-                url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3',
+                album: 'Une Chanson Douce (Instru)', 
+                url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', 
                 lyrics: "Un souffle pur,\nau creux d'un grand silence,\nUn havre doux, une immense présence.\nDe ce refuge, jaillit un feu constant,\nUne chaleur, pour un élan vibrant.\n\nJe suis l'éclat, d'un soleil de printemps,\nJe trouve là, un amour de géant.\n\nVers cet éclat, court un fleuve de vie,\nUn chant puissant,\npour une force infinie.\nDans ce voyage,\ns'ouvre une seule maison,\nUne racine, au bout de l'horizon.\n\nJe deviens fleur, au creux de ce jardin,\nJe perds la peur, en serrant cette main.\n\nUn cycle pur, de la terre au sommet,\nJe reste là, pour la vie, à jamais.\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais...\nPour la vie, à jamais."
             }
         ];
@@ -168,26 +164,46 @@
         };
         if (localStorage.getItem('liked_album_instru')) likeSvg.style.fill = "#bc13fe";
 
-        window.playTrack = async (index, startTime = 0) => {
+        window.loadTrack = (index) => {
             currentIndex = index;
             const track = playlist[index];
             localStorage.setItem('instru_index', currentIndex);
+            document.getElementById('current-title').innerText = track.title;
+            document.getElementById('current-artist-album').innerText = "Hanaé - " + track.album;
+            audio.src = track.url;
+            iconPlay.style.display="block"; 
+            iconPause.style.display="none";
+        };
+
+        window.playTrack = async (index) => {
+            const track = playlist[index];
             try { await updateDoc(trackStatsRef, { [track.id]: increment(1) }); } catch(e) {}
             
-            document.getElementById('current-title').classList.add('fade-out');
-            setTimeout(() => {
-                document.getElementById('current-title').innerText = track.title;
-                document.getElementById('current-artist-album').innerText = "Hanaé - Une Chanson Douce (Instru)";
-                document.getElementById('current-title').classList.remove('fade-out');
-                audio.src = track.url;
-                audio.currentTime = startTime;
-                audio.play().then(() => { iconPlay.style.display="none"; iconPause.style.display="block"; });
-            }, 500);
+            if (currentIndex !== index) {
+                window.loadTrack(index);
+            }
+            
+            audio.play().then(() => { 
+                iconPlay.style.display="none"; 
+                iconPause.style.display="block"; 
+            });
         };
 
         window.togglePlay = () => { 
-            if (audio.paused) { audio.play(); iconPlay.style.display="none"; iconPause.style.display="block"; } 
-            else { audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none"; }
+            if (audio.paused) { 
+                if (audio.currentTime === 0) {
+                    const track = playlist[currentIndex];
+                    updateDoc(trackStatsRef, { [track.id]: increment(1) }).catch(e => {});
+                }
+                audio.play(); 
+                iconPlay.style.display="none"; 
+                iconPause.style.display="block"; 
+            } 
+            else { 
+                audio.pause(); 
+                iconPlay.style.display="block"; 
+                iconPause.style.display="none"; 
+            }
         };
 
         window.toggleLyrics = () => {
@@ -200,7 +216,7 @@
             }
         };
 
-        window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music - Instru', url: window.location.href }); };
+        window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music Instru', url: window.location.href }); };
 
         const listDiv = document.getElementById('track-list');
         playlist.forEach((track, index) => {
@@ -211,7 +227,9 @@
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
         audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
 
-        window.addEventListener('load', () => { window.playTrack(currentIndex, 0); });
+        window.addEventListener('load', () => { 
+            window.loadTrack(currentIndex); 
+        });
     </script>
 </body>
 </html>
