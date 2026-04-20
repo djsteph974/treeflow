@@ -12,9 +12,28 @@
         body { background-color: var(--noir); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
         .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
-        .header { padding: 15px 20px; }
+        .header { padding: 15px 20px 5px; }
         h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
         
+        /* Style discret pour le badge APK */
+        .apk-badge-container { padding: 0 20px; margin-bottom: 15px; }
+        .btn-apk-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(204, 0, 255, 0.1);
+            border: 1px solid rgba(204, 0, 255, 0.3);
+            border-radius: 20px;
+            padding: 5px 12px;
+            text-decoration: none;
+            color: #ccc;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-apk-mini:active { transform: scale(0.95); background: rgba(204, 0, 255, 0.2); }
+        .apk-icon-mini { width: 14px; height: 14px; fill: var(--violet); }
+
         .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
         
         .btn-like { 
@@ -58,7 +77,6 @@
         .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
 
-        /* Section Commentaires */
         .comment-box { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .comment-input, .comment-pseudo { width: 100%; background: #222; border: 1px solid #444; border-radius: 8px; color: white; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
         .comment-btn { background: var(--violet); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
@@ -72,6 +90,13 @@
 
     <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
     <div class="header"><h1>Hanaé</h1></div>
+
+    <div class="apk-badge-container">
+        <a href="https://github.com/djsteph974/treeflow/releases/download/v1.7/TreeFlow.Music.v1.7.apk" class="btn-apk-mini">
+            <svg class="apk-icon-mini" viewBox="0 0 24 24"><path d="M17,1H7A2,2 0 0,0 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3A2,2 0 0,0 17,1M17,19H7V5H17V19M16,13H13V8H11V13H8L12,17L16,13Z" /></svg>
+            App Android (v1.7)
+        </a>
+    </div>
 
     <div class="actions">
         <div class="btn-like" id="btnLike">
@@ -148,7 +173,7 @@
             { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal', album: 'Une Chanson Douce' },
             { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal', album: 'Une Chanson Douce' },
             { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
-            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
+            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
             { id: 'bonne_fete_instru', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
             { id: 'maman_je_taime_instru', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' }
         ];
@@ -178,7 +203,6 @@
         onSnapshot(statsInstruRef, snap => { if (snap.exists()) { statsData.instru = snap.data(); updateDisplay(); } });
         onSnapshot(likeRef, snap => { if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count; });
 
-        // --- GESTION COMMENTAIRES ---
         const btnSend = document.getElementById('sendComment');
         const pseudoInput = document.getElementById('pseudo');
         const commentInput = document.getElementById('comment');
@@ -203,7 +227,6 @@
             });
         });
 
-        // --- LIKES ---
         likeBtn.onclick = async () => {
             if (!localStorage.getItem('hanae_liked')) {
                 await updateDoc(likeRef, { count: increment(1) });
@@ -213,24 +236,18 @@
         };
         if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
 
-        // --- LECTEUR ---
         window.jouer = async (i) => {
             currentIndex = i;
             const track = currentTop5[i];
             const ref = track.type === 'normal' ? statsDouceRef : statsInstruRef;
-            
-            // Mise à jour stats
             await updateDoc(ref, { [track.id]: increment(1) });
             
-            // Affichage Autoradio / MediaSession
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: track.title,
                     artist: "Hanaé",
                     album: track.album || "Hanaé Music",
-                    artwork: [
-                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
-                    ]
+                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
                 });
             }
 
@@ -248,7 +265,6 @@
         window.nextTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex + 1) % currentTop5.length); };
         window.prevTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length); };
 
-        // Configuration des boutons Autoradio / Volant / Lockscreen
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
             navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
@@ -256,14 +272,9 @@
             navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
         }
 
-        // --- ANTI-VEILLE (WAKE LOCK) ---
         let wakeLock = null;
         const requestWakeLock = async () => {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) { console.log("Wake Lock error:", err.message); }
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
         };
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock();
