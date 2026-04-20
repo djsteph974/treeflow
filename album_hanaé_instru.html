@@ -169,6 +169,19 @@
             localStorage.setItem('instru_index', currentIndex);
             document.getElementById('current-title').innerText = track.title;
             document.getElementById('current-artist-album').innerText = "Hanaé - " + track.album;
+            
+            // --- MEDIASESSION API ---
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: "Hanaé",
+                    album: track.album,
+                    artwork: [
+                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+            }
+
             audio.src = track.url;
             iconPlay.style.display="block"; iconPause.style.display="none";
         };
@@ -192,6 +205,27 @@
             }
         };
 
+        // --- NAVIGATION SUIVANT / PRECEDENT ---
+        window.nextTrack = () => {
+            let next = currentIndex + 1;
+            if (next >= playlist.length) next = 0;
+            window.playTrack(next);
+        };
+
+        window.prevTrack = () => {
+            let prev = currentIndex - 1;
+            if (prev < 0) prev = playlist.length - 1;
+            window.playTrack(prev);
+        };
+
+        // --- CONTROLES EXTERNES ---
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('previoustrack', () => window.prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
+        }
+
         window.toggleLyrics = () => {
             const overlay = document.getElementById('lyrics-overlay');
             if (overlay.style.display === 'block') overlay.style.display = 'none';
@@ -211,7 +245,7 @@
 
         audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
-        audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
+        audio.onended = () => window.nextTrack();
 
         // --- ANTI-VEILLE (WAKE LOCK) ---
         let wakeLock = null;

@@ -143,14 +143,14 @@
         const listContainer = document.getElementById('track-list');
 
         const allTracks = [
-            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'normal' },
-            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'normal' },
-            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal' },
-            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal' },
-            { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru' },
-            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru' },
-            { id: 'bonne_fete_instru', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru' },
-            { id: 'maman_je_taime_instru', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru' }
+            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'normal', album: 'Une Chanson Douce' },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'normal', album: 'Une Chanson Douce' },
+            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal', album: 'Une Chanson Douce' },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal', album: 'Une Chanson Douce' },
+            { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
+            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
+            { id: 'bonne_fete_instru', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
+            { id: 'maman_je_taime_instru', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' }
         ];
 
         let currentTop5 = [];
@@ -218,7 +218,22 @@
             currentIndex = i;
             const track = currentTop5[i];
             const ref = track.type === 'normal' ? statsDouceRef : statsInstruRef;
+            
+            // Mise à jour stats
             await updateDoc(ref, { [track.id]: increment(1) });
+            
+            // Affichage Autoradio / MediaSession
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: "Hanaé",
+                    album: track.album || "Hanaé Music",
+                    artwork: [
+                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+            }
+
             audio.src = track.url;
             audio.play();
             mainBtn.classList.add('playing');
@@ -232,6 +247,14 @@
         };
         window.nextTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex + 1) % currentTop5.length); };
         window.prevTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length); };
+
+        // Configuration des boutons Autoradio / Volant / Lockscreen
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('previoustrack', () => window.prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
+        }
 
         // --- ANTI-VEILLE (WAKE LOCK) ---
         let wakeLock = null;

@@ -5,7 +5,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-	
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <title>TreeFlow Music - Album</title>
@@ -170,6 +169,19 @@
             localStorage.setItem('dizzeur_index', currentIndex);
             document.getElementById('current-title').innerText = track.title;
             document.getElementById('current-artist-album').innerText = "Hanaé - " + track.album;
+            
+            // --- GESTION AUTORADIO / LOCKSCREEN ---
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: "Hanaé",
+                    album: track.album,
+                    artwork: [
+                        { src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+            }
+
             audio.src = track.url;
             iconPlay.style.display="block"; iconPause.style.display="none";
         };
@@ -178,7 +190,9 @@
             const track = playlist[index];
             try { await updateDoc(trackStatsRef, { [track.id]: increment(1) }); } catch(e) {}
             if (currentIndex !== index) window.loadTrack(index);
-            audio.play().then(() => { iconPlay.style.display="none"; iconPause.style.display="block"; });
+            audio.play().then(() => { 
+                iconPlay.style.display="none"; iconPause.style.display="block"; 
+            });
         };
 
         window.togglePlay = () => { 
@@ -192,6 +206,24 @@
                 audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none";
             }
         };
+
+        window.nextTrack = () => {
+            if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1);
+            else window.playTrack(0); // Boucle au début
+        };
+
+        window.prevTrack = () => {
+            if (currentIndex > 0) window.playTrack(currentIndex - 1);
+            else window.playTrack(playlist.length - 1); // Va au dernier morceau
+        };
+
+        // --- COMMANDES VOLANT & AUTORADIO ---
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('previoustrack', () => window.prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
+        }
 
         window.toggleLyrics = () => {
             const overlay = document.getElementById('lyrics-overlay');
@@ -212,7 +244,7 @@
 
         audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
         progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
-        audio.onended = () => { if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1); };
+        audio.onended = () => window.nextTrack();
 
         // --- ANTI-VEILLE (WAKE LOCK) ---
         let wakeLock = null;
