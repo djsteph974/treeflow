@@ -26,7 +26,7 @@
         section { padding: 30px 20px 10px; position: relative; }
         h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; opacity: 0.8; }
         
-        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 1px solid transparent; transition: all 0.3s; }
+        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 2px solid transparent; transition: all 0.3s; }
         .track.active { background: rgba(255, 0, 204, 0.12); border-color: var(--rose); }
         .track-num { color: var(--violet); width: 30px; font-weight: 900; }
         .track-name { flex: 1; font-weight: 500; }
@@ -118,7 +118,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
+        const DATE_CIBLE = new Date('2026-04-23T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
 
         const audio = document.getElementById('audioPlayer');
@@ -126,6 +126,7 @@
         const likeBtn = document.getElementById('btnLike');
         const listContainer = document.getElementById('track-list');
         const likeRef = doc(db, "stats", "likes");
+        const trackStatsRef = doc(db, "stats", "track_stats"); // Compteur global des écoutes
         let currentTrackIndex = 0;
 
         const allTracks = [
@@ -137,8 +138,7 @@
         function updateMediaSession(track) {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: track.artist,
+                    title: track.title, artist: track.artist,
                     artwork: [{ src: 'https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc', sizes: '512x512', type: 'image/png' }]
                 });
                 navigator.mediaSession.setActionHandler('play', () => togglePlay());
@@ -160,15 +160,17 @@
                 const p = document.getElementById('pseudo');
                 const c = document.getElementById('comment');
                 const b = document.getElementById('sendComment');
-                p.readOnly = false; p.placeholder = "Ton pseudo...";
-                c.readOnly = false; c.placeholder = "Ton message...";
-                b.disabled = false; b.innerText = "Poster le message";
-                document.getElementById('album-link-1').href = "album_hanaé.html";
-                document.getElementById('album-link-2').href = "album_hanaé_instru.html";
+                if(p.readOnly) {
+                    p.readOnly = false; p.placeholder = "Ton pseudo...";
+                    c.readOnly = false; c.placeholder = "Ton message...";
+                    b.disabled = false; b.innerText = "Poster le message";
+                    document.getElementById('album-link-1').href = "album_hanaé.html";
+                    document.getElementById('album-link-2').href = "album_hanaé_instru.html";
+                }
             }
         };
 
-        // --- GESTION LIKE ---
+        // --- STATS LIKES & ÉCOUTES ---
         likeBtn.onclick = async () => {
             if(!estDisponible()) return;
             if (!localStorage.getItem('hanae_liked')) {
@@ -178,11 +180,10 @@
             }
         };
         if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
-
         onSnapshot(likeRef, snap => { if(snap.exists()) document.getElementById('likeCount').innerText = snap.data().count; });
 
         // --- LECTEUR ---
-        window.jouer = (i) => {
+        window.jouer = async (i) => {
             if(!estDisponible()) return;
             currentTrackIndex = i;
             audio.src = allTracks[i].url;
@@ -190,6 +191,8 @@
             mainBtn.classList.add('playing');
             updateMediaSession(allTracks[i]);
             updateDisplay();
+            // Incrémentation des écoutes globales
+            await updateDoc(trackStatsRef, { count: increment(1) });
         };
 
         window.togglePlay = () => {
