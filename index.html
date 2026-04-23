@@ -39,10 +39,12 @@
 
         .is-waiting .top-banner { filter: blur(8px) brightness(0.7); }
         .is-waiting .track, .is-waiting .album-card { filter: blur(5px); opacity: 0.5; pointer-events: none; }
+        
         .lock-overlay { 
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9); border: 1px solid var(--violet); padding: 12px 25px;
+            background: rgba(0,0,0,0.95); border: 2px solid var(--violet); padding: 12px 25px;
             border-radius: 25px; color: var(--violet); font-weight: bold; font-size: 0.75rem; z-index: 10;
+            text-align: center; white-space: nowrap; box-shadow: 0 0 20px rgba(204, 0, 255, 0.3);
         }
         .is-waiting .lock-overlay { display: block; }
 
@@ -71,8 +73,8 @@
     <audio id="audioPlayer"></audio>
 
     <section>
-        <h2>Le Top 3 (Global)</h2>
-        <div class="lock-overlay">ÉVÉNEMENT LE 31 MAI</div>
+        <h2>LES 3 PLUS ÉCOUTÉS RÉCEMMENT</h2>
+        <div class="lock-overlay">ÉVÉNEMENT À VENIR LE 31 MAI</div>
         <div id="track-list"></div>
     </section>
 
@@ -111,8 +113,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- CONFIGURATION DATE CIBLE ---
-        const DATE_CIBLE = new Date('2026-04-23T00:00:00').getTime();
+        const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
 
         const audio = document.getElementById('audioPlayer');
@@ -134,7 +135,6 @@
 
         const renderTop3 = () => {
             top3List = [...allTracks].sort((a, b) => b.plays - a.plays).slice(0, 3);
-            
             listContainer.innerHTML = "";
             top3List.forEach((t, i) => {
                 const isActive = (currentTrackPlaying && currentTrackPlaying.id === t.id && currentTrackPlaying.dbRef === t.dbRef && !audio.paused);
@@ -148,23 +148,14 @@
                     </div>`;
             });
 
-            // GESTION DU DÉVERROUILLAGE DYNAMIQUE
             if(estDisponible()){
                 document.body.classList.remove('is-waiting');
-                
-                const inputPseudo = document.getElementById('pseudo');
-                const inputComment = document.getElementById('comment');
-                const btnSend = document.getElementById('sendComment');
-
-                inputPseudo.readOnly = false;
-                inputPseudo.placeholder = "Ton pseudo";
-                
-                inputComment.readOnly = false;
-                inputComment.placeholder = "Laisse un petit mot pour Hanaé...";
-                
-                btnSend.disabled = false;
-                btnSend.innerText = "Poster le message";
-                
+                const p = document.getElementById('pseudo');
+                const c = document.getElementById('comment');
+                const b = document.getElementById('sendComment');
+                p.readOnly = false; p.placeholder = "Ton pseudo";
+                c.readOnly = false; c.placeholder = "Laisse un petit mot pour Hanaé...";
+                b.disabled = false; b.innerText = "Poster le message";
                 document.getElementById('album-link-1').href = "album_hanaé.html";
                 document.getElementById('album-link-2').href = "album_hanaé_instru.html";
             }
@@ -191,11 +182,25 @@
             if(!estDisponible()) return;
             const track = allTracks.find(t => t.id === id && t.dbRef === dbRef);
             if(!track) return;
-            
             currentTrackPlaying = track;
             audio.src = track.url;
             audio.play();
             mainBtn.classList.add('playing');
+            
+            // --- MÉDIA SESSION RÉINSTALLÉ ---
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: 'Hanaé',
+                    album: 'Une Chanson Douce',
+                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
+                });
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+            }
+
             await updateDoc(doc(db, "stats", dbRef), { [id]: increment(1) });
         };
 
