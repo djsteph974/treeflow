@@ -3,106 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hanaé - TreeFlow Music</title>
     <style>
         :root { --violet: #cc00ff; --rose: #ff00cc; --noir: #000; }
         body { background-color: var(--noir); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         
-        .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
+        .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; transition: filter 1s; }
         .header { padding: 15px 20px 5px; }
         h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
         
-        /* Style discret pour le badge APK */
-        .apk-badge-container { padding: 0 20px; margin-bottom: 15px; }
-        .btn-apk-mini {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(204, 0, 255, 0.1);
-            border: 1px solid rgba(204, 0, 255, 0.3);
-            border-radius: 20px;
-            padding: 5px 12px;
-            text-decoration: none;
-            color: #ccc;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .btn-apk-mini:active { transform: scale(0.95); background: rgba(204, 0, 255, 0.2); }
-        .apk-icon-mini { width: 14px; height: 14px; fill: var(--violet); }
-
         .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
-        
-        .btn-like { 
-            background: rgba(30,0,50,0.9); 
-            border: 2px solid var(--violet); 
-            border-radius: 25px; 
-            padding: 10px 22px; 
-            color: var(--violet); 
-            font-weight: bold; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .btn-like.liked {
-            background: var(--rose);
-            border-color: var(--rose);
-            color: white;
-            box-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
-            transform: scale(1.05);
-        }
+        .btn-like { background: rgba(30,0,50,0.9); border: 2px solid var(--violet); border-radius: 25px; padding: 10px 22px; color: var(--violet); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-like.liked { background: var(--rose); border-color: var(--rose); color: white; box-shadow: 0 0 15px var(--rose); }
         
         .player-controls { display: flex; align-items: center; gap: 15px; }
         .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(204, 0, 255, 0.4); }
+        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
         .btn-play-main.playing::before { content: 'II'; font-weight: bold; }
         .btn-play-main:not(.playing)::before { content: '▶'; margin-left: 4px; }
 
-        section { padding: 30px 20px 10px; }
+        section { padding: 30px 20px 10px; position: relative; }
         h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; opacity: 0.8; }
         
-        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .track.active { background: rgba(204, 0, 255, 0.15); border-color: var(--violet); }
+        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 1px solid transparent; transition: all 0.3s; }
+        .track.active { background: rgba(255, 0, 204, 0.12); border-color: var(--rose); }
         .track-num { color: var(--violet); width: 30px; font-weight: 900; }
         .track-name { flex: 1; font-weight: 500; }
 
         .album-scroll-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .album-scroll-container::-webkit-scrollbar { display: none; }
-        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; }
+        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; transition: filter 1s; }
         .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
         .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
 
+        /* FLOU & BLOCAGE */
+        .is-waiting .top-banner { filter: blur(8px) brightness(0.7); }
+        .is-waiting .track, .is-waiting .album-card { filter: blur(5px); opacity: 0.5; pointer-events: none; }
+        .lock-overlay { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9); border: 1px solid var(--violet); padding: 12px 25px;
+            border-radius: 25px; color: var(--violet); font-weight: bold; font-size: 0.75rem; z-index: 10;
+        }
+        .is-waiting .lock-overlay { display: block; }
+
         .comment-box { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
         .comment-input, .comment-pseudo { width: 100%; background: #222; border: 1px solid #444; border-radius: 8px; color: white; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
-        .comment-btn { background: var(--violet); border: none; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        #comments-list { margin-top: 20px; }
+        .comment-btn { background: var(--violet); border: none; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .comment-btn:disabled { background: #333; cursor: not-allowed; }
+        #comments-list { margin-top: 20px; max-height: 300px; overflow-y: auto; }
         .comment-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--violet); }
-        .comment-item b { color: var(--rose); font-size: 0.9rem; display: block; margin-bottom: 4px; }
-        .comment-item p { margin: 0; font-size: 0.95rem; opacity: 0.9; }
     </style>
 </head>
-<body>
+<body class="is-waiting">
 
     <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
     <div class="header"><h1>Hanaé</h1></div>
 
-    <div class="apk-badge-container">
-        <a href="https://github.com/djsteph974/treeflow/releases/download/v1.7/TreeFlow.Music.v1.7.apk" class="btn-apk-mini">
-            <svg class="apk-icon-mini" viewBox="0 0 24 24"><path d="M17,1H7A2,2 0 0,0 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3A2,2 0 0,0 17,1M17,19H7V5H17V19M16,13H13V8H11V13H8L12,17L16,13Z" /></svg>
-            App Android (v1.7)
-        </a>
-    </div>
-
     <div class="actions">
-        <div class="btn-like" id="btnLike">
-            <span id="heartIcon">❤️</span> <span id="likeCount">...</span>
-        </div>
-        
+        <div class="btn-like" id="btnLike">❤️ <span id="likeCount">...</span></div>
         <div class="player-controls">
             <button class="btn-control" onclick="prevTrack()">⏮</button>
             <button class="btn-play-main" id="mainPlayBtn" onclick="togglePlay()"></button>
@@ -110,21 +69,23 @@
         </div>
     </div>
 
-    <audio id="audioPlayer" onended="nextTrack()"></audio>
+    <audio id="audioPlayer"></audio>
 
     <section>
-        <h2>Les plus écoutés</h2>
+        <h2>Le Top 3</h2>
+        <div class="lock-overlay">ÉVÉNEMENT LE 31 MAI</div>
         <div id="track-list"></div>
     </section>
 
     <section>
         <h2>Discographie</h2>
+        <div class="lock-overlay">BIENTÔT DISPONIBLE</div>
         <div class="album-scroll-container">
-            <a href="album_hanaé.html?v=1" id="link-album" class="album-card">
+            <a href="#" id="album-link-1" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce</span>
             </a>
-            <a href="album_hanaé_instru.html?v=1" id="link-instru" class="album-card">
+            <a href="#" id="album-link-2" class="album-card">
                 <div class="cover"><div class="mini-play">▶</div></div>
                 <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce - Instru</span>
             </a>
@@ -134,16 +95,16 @@
     <section>
         <h2>Livre d'or</h2>
         <div class="comment-box">
-            <input type="text" id="pseudo" class="comment-pseudo" placeholder="Ton pseudo..." required>
-            <textarea id="comment" class="comment-input" placeholder="Laisse un petit message pour Hanaé..." rows="3" required></textarea>
-            <button class="comment-btn" id="sendComment">Publier le message</button>
+            <input type="text" id="pseudo" class="comment-pseudo" placeholder="Livre d'or verrouillé" readonly>
+            <textarea id="comment" class="comment-input" placeholder="Revenez le 31 mai pour laisser un message." rows="3" readonly></textarea>
+            <button class="comment-btn" id="sendComment" disabled>Indisponible</button>
             <div id="comments-list"></div>
         </div>
     </section>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -157,77 +118,59 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        const likeRef = doc(db, "stats", "likes");
-        const statsDouceRef = doc(db, "stats", "track_stats_douce");
-        const statsInstruRef = doc(db, "stats", "track_stats_douce_instru");
-        const commentsCol = collection(db, "comments");
+        const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
+        const estDisponible = () => Date.now() >= DATE_CIBLE;
 
-        const likeBtn = document.getElementById('btnLike');
         const audio = document.getElementById('audioPlayer');
         const mainBtn = document.getElementById('mainPlayBtn');
+        const likeBtn = document.getElementById('btnLike');
         const listContainer = document.getElementById('track-list');
+        const likeRef = doc(db, "stats", "likes");
+        let currentTrackIndex = 0;
 
         const allTracks = [
-            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', type: 'normal', album: 'Une Chanson Douce' },
-            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', type: 'normal', album: 'Une Chanson Douce' },
-            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', type: 'normal', album: 'Une Chanson Douce' },
-            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', type: 'normal', album: 'Une Chanson Douce' },
-            { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/03%20HANAE%20-%20UNE%20CHANSON%20DOUCE%20%28Version%20Instru%29.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
-            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/04%20LA%20GRACE%20DE%20LA%20FLEUR%20%28Version%20Instru%29.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
-            { id: 'bonne_fete_instru', title: 'Bonne Fête Maman (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/01%20HANAE%20-%20BONNE%20FETE%20MAMAN%20%28Version%20Instru%29.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' },
-            { id: 'maman_je_taime_instru', title: 'Maman Je t\'aime (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/02%20HANAE%20-%20MAMAN%20JE%20T%20AIME%20%28Version%20Instru%29.mp3', type: 'instru', album: 'Une Chanson Douce (Instru)' }
+            { title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', artist: 'Hanaé' },
+            { title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', artist: 'Hanaé' },
+            { title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', artist: 'Hanaé' }
         ];
 
-        let currentTop5 = [];
-        let currentIndex = -1;
-        let statsData = { normal: {}, instru: {} };
+        function updateMediaSession(track) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: track.artist,
+                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc', sizes: '512x512', type: 'image/png' }]
+                });
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+            }
+        }
 
         const updateDisplay = () => {
-            const scoredTracks = allTracks.map(track => ({
-                ...track,
-                plays: statsData[track.type][track.id] || 0
-            }));
-            currentTop5 = scoredTracks.sort((a, b) => b.plays - a.plays).slice(0, 5);
             listContainer.innerHTML = "";
-            currentTop5.forEach((t, i) => {
-                const activeClass = (currentIndex === i) ? 'active' : '';
-                listContainer.innerHTML += `
-                    <div class="track ${activeClass}" onclick="jouer(${i})">
-                        <span class="track-num">${i+1}</span>
-                        <span class="track-name">${t.title}</span>
-                    </div>`;
+            allTracks.forEach((t, i) => {
+                const activeClass = (i === currentTrackIndex && !audio.paused) ? 'active' : '';
+                listContainer.innerHTML += `<div class="track ${activeClass}" onclick="jouer(${i})"><span class="track-num">${i+1}</span><span class="track-name">${t.title}</span></div>`;
             });
+
+            if(estDisponible()){
+                document.body.classList.remove('is-waiting');
+                const p = document.getElementById('pseudo');
+                const c = document.getElementById('comment');
+                const b = document.getElementById('sendComment');
+                p.readOnly = false; p.placeholder = "Ton pseudo...";
+                c.readOnly = false; c.placeholder = "Ton message...";
+                b.disabled = false; b.innerText = "Poster le message";
+                document.getElementById('album-link-1').href = "album_hanaé.html";
+                document.getElementById('album-link-2').href = "album_hanaé_instru.html";
+            }
         };
 
-        onSnapshot(statsDouceRef, snap => { if (snap.exists()) { statsData.normal = snap.data(); updateDisplay(); } });
-        onSnapshot(statsInstruRef, snap => { if (snap.exists()) { statsData.instru = snap.data(); updateDisplay(); } });
-        onSnapshot(likeRef, snap => { if (snap.exists()) document.getElementById('likeCount').innerText = snap.data().count; });
-
-        const btnSend = document.getElementById('sendComment');
-        const pseudoInput = document.getElementById('pseudo');
-        const commentInput = document.getElementById('comment');
-        const commentsList = document.getElementById('comments-list');
-
-        btnSend.onclick = async () => {
-            const pseudo = pseudoInput.value.trim();
-            const text = commentInput.value.trim();
-            if(!pseudo || !text) return;
-            try {
-                await addDoc(commentsCol, { author: pseudo, content: text, timestamp: Date.now() });
-                commentInput.value = "";
-            } catch(e) { console.error(e); }
-        };
-
-        const q = query(commentsCol, orderBy("timestamp", "desc"), limit(10));
-        onSnapshot(q, (snap) => {
-            commentsList.innerHTML = "";
-            snap.forEach(doc => {
-                const c = doc.data();
-                commentsList.innerHTML += `<div class="comment-item"><b>${c.author}</b><p>${c.content}</p></div>`;
-            });
-        });
-
+        // --- GESTION LIKE ---
         likeBtn.onclick = async () => {
+            if(!estDisponible()) return;
             if (!localStorage.getItem('hanae_liked')) {
                 await updateDoc(likeRef, { count: increment(1) });
                 localStorage.setItem('hanae_liked', 'true');
@@ -236,56 +179,50 @@
         };
         if(localStorage.getItem('hanae_liked')) likeBtn.classList.add('liked');
 
-        window.jouer = async (i) => {
-            currentIndex = i;
-            const track = currentTop5[i];
-            const ref = track.type === 'normal' ? statsDouceRef : statsInstruRef;
-            await updateDoc(ref, { [track.id]: increment(1) });
-            
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: "Hanaé",
-                    album: track.album || "Hanaé Music",
-                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
-                });
-            }
+        onSnapshot(likeRef, snap => { if(snap.exists()) document.getElementById('likeCount').innerText = snap.data().count; });
 
-            audio.src = track.url;
+        // --- LECTEUR ---
+        window.jouer = (i) => {
+            if(!estDisponible()) return;
+            currentTrackIndex = i;
+            audio.src = allTracks[i].url;
             audio.play();
             mainBtn.classList.add('playing');
-            updateDisplay(); 
+            updateMediaSession(allTracks[i]);
+            updateDisplay();
         };
 
         window.togglePlay = () => {
-            if (currentIndex === -1) { window.jouer(0); return; }
-            if (audio.paused) { audio.play(); mainBtn.classList.add('playing'); }
-            else { audio.pause(); mainBtn.classList.remove('playing'); }
+            if(!estDisponible()) return;
+            if (audio.src === "") { jouer(0); return; }
+            audio.paused ? audio.play() : audio.pause();
+            mainBtn.classList.toggle('playing', !audio.paused);
+            updateDisplay();
         };
-        window.nextTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex + 1) % currentTop5.length); };
-        window.prevTrack = () => { if(currentTop5.length > 0) window.jouer((currentIndex - 1 + currentTop5.length) % currentTop5.length); };
 
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
-            navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
-            navigator.mediaSession.setActionHandler('previoustrack', () => window.prevTrack());
-            navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
-        }
+        window.nextTrack = () => { if(estDisponible()) jouer((currentTrackIndex + 1) % allTracks.length); };
+        window.prevTrack = () => { if(estDisponible()) jouer((currentTrackIndex - 1 + allTracks.length) % allTracks.length); };
+        audio.onended = () => nextTrack();
 
-        let wakeLock = null;
-        const requestWakeLock = async () => {
-            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
+        // --- COMMENTAIRES ---
+        document.getElementById('sendComment').onclick = async () => {
+            const pseudo = document.getElementById('pseudo').value;
+            const texte = document.getElementById('comment').value;
+            if(!pseudo || !texte) return;
+            await addDoc(collection(db, "comments"), { pseudo, text: texte, date: serverTimestamp() });
+            document.getElementById('comment').value = "";
         };
-        document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock();
+
+        onSnapshot(query(collection(db, "comments"), orderBy("date", "desc")), snap => {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                list.innerHTML += `<div class="comment-item"><b>${doc.data().pseudo}</b><br>${doc.data().text}</div>`;
+            });
         });
 
-        window.addEventListener('load', () => {
-            const timestamp = Date.now();
-            document.getElementById('link-album').href = "album_hanaé.html?v=" + timestamp;
-            document.getElementById('link-instru').href = "album_hanaé_instru.html?v=" + timestamp;
-            requestWakeLock();
-        });
+        updateDisplay();
+        setInterval(updateDisplay, 10000);
     </script>
 </body>
 </html>
