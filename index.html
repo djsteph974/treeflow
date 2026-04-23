@@ -98,8 +98,10 @@
     </section>
 
     <script type="module">
+        // --- IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -112,6 +114,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
         
         const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
@@ -187,12 +190,9 @@
             audio.play();
             mainBtn.classList.add('playing');
             
-            // --- MÉDIA SESSION RÉINSTALLÉ ---
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title,
-                    artist: 'Hanaé',
-                    album: 'Une Chanson Douce',
+                    title: track.title, artist: 'Hanaé', album: 'Une Chanson Douce',
                     artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
                 });
                 navigator.mediaSession.setActionHandler('play', () => togglePlay());
@@ -200,7 +200,6 @@
                 navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
                 navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
             }
-
             await updateDoc(doc(db, "stats", dbRef), { [id]: increment(1) });
         };
 
@@ -251,6 +250,22 @@
             list.innerHTML = "";
             snap.forEach(d => { list.innerHTML += `<div class="comment-item"><b>${d.data().pseudo}</b><br>${d.data().text}</div>`; });
         });
+
+        // --- GESTION DES NOTIFICATIONS ---
+        async function demanderPermissionNotif() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Remplace par ta clé VAPID quand tu l'auras
+                    const token = await getToken(messaging, { vapidKey: 'TON_CLE_VAPID_PUBLIQUE' });
+                    if (token) console.log('Notifications prêtes');
+                }
+            } catch (error) { console.error('Erreur notification:', error); }
+        }
+
+        document.addEventListener('click', () => {
+            if (Notification.permission === 'default') demanderPermissionNotif();
+        }, { once: true });
 
         syncStats();
     </script>
