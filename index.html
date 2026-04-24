@@ -115,9 +115,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const messaging = getMessaging(app);
-        // On demande le Token à Firebase
-alert("Étape 1 : Lancement de la demande de Token...");
-
 // On force l'enregistrement avec le chemin exact vers ton sous-dossier
 navigator.serviceWorker.register('/treeflow/firebase-messaging-sw.js')
 .then((registration) => {
@@ -138,9 +135,7 @@ navigator.serviceWorker.register('/treeflow/firebase-messaging-sw.js')
     alert("Erreur de chemin : " + err);
 });
 
-    // Si ça échoue, cette alerte nous dira POURQUOI (ex: fichier manquant ou erreur réseau)
-    alert("Étape 2 : ERREUR DÉTECTÉE -> " + err);
-});
+
 
     
         
