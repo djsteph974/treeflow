@@ -115,6 +115,21 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const messaging = getMessaging(app);
+        // On demande le Token à Firebase
+getToken(messaging, { vapidKey: 'BIUhj36lFGfQTI7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQHL9OrRzQ' })
+    .then((currentToken) => {
+        if (currentToken) {
+            // Cette alerte va s'afficher sur ton tel pour que tu puisses copier le code
+            alert("Ton Token de test :\n\n" + currentToken);
+            console.log("Token à copier dans Firebase :", currentToken);
+        } else {
+            // Si l'utilisateur refuse les notifications
+            console.log('Aucun Token reçu. Vérifie les permissions de notification du navigateur.');
+        }
+    }).catch((err) => {
+        console.log('Erreur lors de la récupération du Token :', err);
+    });
+    
         
         const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
