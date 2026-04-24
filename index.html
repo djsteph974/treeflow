@@ -257,7 +257,7 @@
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
                     // Remplace par ta clé VAPID quand tu l'auras
-                    const token = await getToken(messaging, { vapidKey: 'TON_CLE_VAPID_PUBLIQUE' });
+                    const token = await getToken(messaging, { vapidKey: 'BIUhj36IFGfQTl7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQQHL9OrRzQ' });
                     if (token) console.log('Notifications prêtes');
                 }
             } catch (error) { console.error('Erreur notification:', error); }
