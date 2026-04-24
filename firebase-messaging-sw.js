@@ -11,15 +11,3 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-
-// Gère l'affichage quand l'app est fermée
-messaging.onBackgroundMessage((payload) => {
-  console.log('Notification reçue en arrière-plan:', payload);
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: 'https://googleusercontent.com/profile/picture/0'
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
