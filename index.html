@@ -115,43 +115,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const messaging = getMessaging(app);
-// Fonction de conversion sécurisée pour la clé VAPID
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-}
-
-// Ta clé VAPID exacte et nettoyée
-const vapidKeyData = 'BIUhj36IFGfQTl7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQQHL9OrRzQ';
-
-navigator.serviceWorker.register('/treeflow/firebase-messaging-sw.js')
-.then((registration) => {
-    // On convertit la clé avant de la donner à getToken
-    const convertedVapidKey = urlBase64ToUint8Array(vapidKeyData);
-    
-    return getToken(messaging, { 
-        serviceWorkerRegistration: registration,
-        vapidKey: convertedVapidKey 
-    });
-})
-.then((currentToken) => {
-    if (currentToken) {
-        alert("ENFIN ! COPIE TON TOKEN :\n\n" + currentToken);
-        console.log("Token:", currentToken);
-    } else {
-        alert("Pas de token. Vérifie les permissions de notification.");
-    }
-})
-.catch((err) => {
-    alert("Erreur finale : " + err);
-});
-
+        
         const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
 
