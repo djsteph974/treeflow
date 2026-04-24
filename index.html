@@ -118,15 +118,26 @@
         // On demande le Token à Firebase
 alert("Étape 1 : Lancement de la demande de Token...");
 
-getToken(messaging, { vapidKey: 'BIUhj36lFGfQTI7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQHL9OrRzQ' })
+// On force l'enregistrement avec le chemin exact vers ton sous-dossier
+navigator.serviceWorker.register('/treeflow/firebase-messaging-sw.js')
+.then((registration) => {
+    console.log('Service Worker enregistré avec succès dans /treeflow/');
+    return getToken(messaging, { 
+        serviceWorkerRegistration: registration,
+        vapidKey: 'BIUhj36lFGfQTI7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQHL9OrRzQ' 
+    });
+})
 .then((currentToken) => {
     if (currentToken) {
-        alert("Étape 2 : TOKEN REÇU !\n\n" + currentToken);
-        console.log("Token:", currentToken);
+        alert("TON TOKEN :\n\n" + currentToken);
     } else {
-        alert("Étape 2 : Aucun token généré. Vérifie que le fichier firebase-messaging-sw.js est bien à la racine de ton GitHub.");
+        alert("Pas de token généré. Vérifie les permissions.");
     }
-}).catch((err) => {
+})
+.catch((err) => {
+    alert("Erreur de chemin : " + err);
+});
+
     // Si ça échoue, cette alerte nous dira POURQUOI (ex: fichier manquant ou erreur réseau)
     alert("Étape 2 : ERREUR DÉTECTÉE -> " + err);
 });
