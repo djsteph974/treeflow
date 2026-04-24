@@ -115,25 +115,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const messaging = getMessaging(app);
-// On force l'enregistrement avec le chemin exact vers ton sous-dossier
 navigator.serviceWorker.register('/treeflow/firebase-messaging-sw.js')
 .then((registration) => {
-    console.log('Service Worker enregistré avec succès dans /treeflow/');
+    // On utilise la clé VAPID propre sans espaces
+    const MaCleVapid = 'BIUhj36lFGfQTI7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQHL9OrRzQ';
+    
     return getToken(messaging, { 
         serviceWorkerRegistration: registration,
-        vapidKey: 'BIUhj36lFGfQTI7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQHL9OrRzQ' 
+        vapidKey: MaCleVapid 
     });
 })
 .then((currentToken) => {
     if (currentToken) {
-        alert("TON TOKEN :\n\n" + currentToken);
+        alert("VICTOIRE ! VOICI TON TOKEN :\n\n" + currentToken);
     } else {
         alert("Pas de token généré. Vérifie les permissions.");
     }
 })
 .catch((err) => {
-    alert("Erreur de chemin : " + err);
+    alert("Erreur de clé : " + err);
 });
+
 
         const DATE_CIBLE = new Date('2026-05-31T00:00:00').getTime();
         const estDisponible = () => Date.now() >= DATE_CIBLE;
