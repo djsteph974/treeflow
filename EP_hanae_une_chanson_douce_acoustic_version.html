@@ -30,7 +30,7 @@
         #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; }
         #current-artist-album { font-size: 14px; margin: 0 0 10px 0; color: #bc13fe; }
         
-        .btn-clip { background: #bc13fe; color: white; border: none; border-radius: 20px; padding: 8px 20px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .btn-clip { background: #bc13fe; color: white; border: none; border-radius: 20px; padding: 8px 20px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 5px; }
 
         .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
         #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
@@ -92,6 +92,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 .61-.03 1.3-.1 2.1-.06.8-.15 1.43-.28 1.9-.13.47-.35.84-.66 1.1-.31.27-.68.45-1.12.55-.44.11-1.11.2-2 .26-.89.06-1.78.09-2.66.09H12c-.88 0-1.77-.03-2.66-.09-.89-.06-1.56-.15-2-.26-.44-.1-.81-.28-1.12-.55-.31-.26-.53-.63-.66-1.1-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L5 12c0-.61.03-1.3.1-2.1.06-.8.15-1.43.28-1.9.13-.47.35-.84.66-1.1.31-.27.68-.45 1.12-.55.44-.11 1.11-.2 2-.26.89-.06 1.78-.09 2.66-.09H12c.88 0 1.77.03 2.66.09.89.06 1.56.15 2 .26.44.1.81.28 1.12.55.31.26.53.63.66 1.1z"/></svg>
                     Voir le Clip
                 </button>
+                <div id="clip-view-count" style="font-size: 11px; color: #888; margin-bottom: 10px; font-style: italic;">0 vues</div>
             </div>
 
             <div class="controls-container">
@@ -121,8 +122,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
         const likeRef = doc(db, "stats", "une_chanson_douce_acoustique");
         const trackStatsRef = doc(db, "stats", "track_stats_douce_acoustique");
+        const clipStatsRef = doc(db, "stats", "clip_stats_douce_acoustique");
 
         const playlist = [
             { 
@@ -130,14 +133,14 @@
                 title: 'Une Chanson Douce - Version Acoustique', 
                 album: 'Une Chanson Douce - EP', 
                 url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/01%20Une%20Chanson%20Douce%20Version%20Acoustique%20EP.mp3', 
-                lyrics: `Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie`
+                lyrics: `Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie` 
             },
             { 
                 id: 'chanson_douce_acoustique_instru', 
                 title: 'Une Chanson Douce - Version Acoustique Instrumentale', 
                 album: 'Une Chanson Douce - EP', 
                 url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/02%20Une%20Chanson%20Douce%20Version%20Acoustique%20Instrumentale%20EP.mp3', 
-                lyrics: `Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie`
+                lyrics: `Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie` 
             }
         ];
 
@@ -150,6 +153,7 @@
         let currentIndex = parseInt(localStorage.getItem('ep_index')) || 0;
 
         onSnapshot(likeRef, (snap) => { if (snap.exists()) counterDisplay.innerText = snap.data().count; });
+        onSnapshot(clipStatsRef, (snap) => { if (snap.exists()) document.getElementById('clip-view-count').innerText = `${snap.data().views || 0} vues`; });
         onSnapshot(trackStatsRef, (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
@@ -200,6 +204,7 @@
         };
 
         window.playClip = () => {
+            updateDoc(clipStatsRef, { views: increment(1) }).catch(e => {});
             audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none";
             const overlay = document.getElementById('video-overlay');
             const container = document.getElementById('video-container');
