@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <title>TreeFlow Music - Album</title>
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .container { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
+        
+        .header-sticky { position: sticky; top: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #bc13fe; background-image: url('https://lh3.googleusercontent.com/d/1yFhw6NB5g3Owfk40mzET56kMjJf5QOSu'); background-size: cover; background-position: center; }
+        .header-sticky-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: -1; }
+        
+        .back-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        
+        .actions-right { position: absolute; top: 15px; right: 15px; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 110; }
+        
+        .like-btn { cursor: pointer; display: flex; flex-direction: column; align-items: center; width: 44px; transition: transform 0.2s; }
+        .like-btn:active { transform: scale(1.2); }
+        
+        #like-svg { width: 30px; height: 30px; overflow: visible !important; }
+        #like-counter { font-size: 12px; color: #bc13fe; margin-top: 2px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+        
+        .share-btn { cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; padding: 5px; }
+        .share-btn:active { opacity: 0.6; }
+
+        .jaquette-container { width: 50%; aspect-ratio: 1/1; margin: 10px auto; background-image: url('https://lh3.googleusercontent.com/d/1grK15czX1o1HMMGGdBLpxy26xWrgBaz4'); background-size: cover; background-position: center; border: 2px solid #bc13fe; cursor: pointer; position: relative; z-index: 1; }
+        #track-info { width: 100%; padding: 10px 15px; background: rgba(17, 17, 17, 0.7); box-sizing: border-box; text-align: center; }
+        #current-title { font-size: 22px; margin: 0 0 5px 0; font-weight: bold; transition: opacity 0.5s; }
+        #current-artist-album { font-size: 14px; margin: 0; color: #bc13fe; transition: opacity 0.5s; }
+        
+        .controls-container { width: 95%; margin: 10px auto; display: flex; align-items: center; gap: 10px; padding: 10px; background: #111; border-radius: 10px; box-sizing: border-box; }
+        #play-pause-btn { background: #bc13fe; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+        #play-pause-btn svg { width: 22px; height: 22px; fill: white; }
+        #progress-bar { flex-grow: 1; accent-color: #bc13fe; cursor: pointer; }
+        
+        .track-list { width: 95%; margin: 10px auto; padding-bottom: 20px; }
+        .track { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .track-info-text { cursor: pointer; flex-grow: 1; }
+        .track h3 { margin: 0 0 5px 0; font-size: 16px; }
+        .track p { margin: 0; font-size: 12px; color: #bc13fe; display: flex; align-items: center; gap: 8px; }
+        .play-count { color: #888; font-size: 11px; font-style: italic; }
+        .download-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .download-btn svg { width: 24px; height: 24px; fill: #bc13fe; }
+
+        #lyrics-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; padding: 20px; box-sizing: border-box; overflow-y: auto; text-align: center; }
+        #lyrics-content { font-size: 16px; line-height: 1.8; margin-top: 40px; white-space: pre-line; color: #ddd; }
+        .close-lyrics { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; color: #bc13fe; }
+    </style>
+</head>
+<body>
+    <div id="lyrics-overlay"><span class="close-lyrics" onclick="toggleLyrics()">×</span><h2 id="lyrics-title" style="color: #bc13fe;">Paroles</h2><div id="lyrics-content"></div></div>
+    
+    <div class="container">
+        <div class="header-sticky">
+            <div class="header-sticky-blur"></div>
+            <div class="back-btn" onclick="window.location.href='index.html?v=' + Date.now()">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="#bc13fe"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </div>
+            <div class="actions-right">
+                <div class="like-btn" onclick="handleLikeClick()">
+                    <svg id="like-svg" viewBox="-10 -10 44 44" fill="none" stroke="#bc13fe" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    <div id="like-counter">...</div>
+                </div>
+                <div class="share-btn" onclick="handleShare()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#bc13fe"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+                </div>
+            </div>
+            <div class="jaquette-container" onclick="toggleLyrics()"></div>
+            <div id="track-info"><h2 id="current-title">Chargement...</h2><p id="current-artist-album">Hanaé</p></div>
+            <div class="controls-container">
+                <button id="play-pause-btn" onclick="togglePlay()">
+                    <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <input type="range" id="progress-bar" value="0" max="100">
+            </div>
+            <audio id="audio-element"></audio>
+        </div>
+        <div class="track-list" id="track-list"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
+            authDomain: "treeflow-music.firebaseapp.com",
+            projectId: "treeflow-music",
+            storageBucket: "treeflow-music.firebasestorage.app",
+            messagingSenderId: "330986852150",
+            appId: "1:330986852150:web:d57958930fa75b9504ad97"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const likeRef = doc(db, "stats", "une_chanson_douce_acoustique");
+        const trackStatsRef = doc(db, "stats", "track_stats_douce_acoustique");
+
+        const playlist = [
+            { 
+                id: 'chanson_douce_acoustique', 
+                title: 'Une Chanson Douce - Version Acoustique', 
+                album: 'Une Chanson Douce - EP', 
+                url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/01%20Une%20Chanson%20Douce%20Version%20Acoustique%20EP.mp3', 
+                lyrics:`Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie`
+            },
+			{ 
+                id: 'chanson_douce_acoustique_instru', 
+                title: 'Une Chanson Douce - Version Acoustique Instrumentale', 
+                album: 'Une Chanson Douce - EP', 
+                url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/02%20Une%20Chanson%20Douce%20Version%20Acoustique%20Instrumentale%20EP.mp3', 
+                lyrics:`Une chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter pour toi\nCar ta peau est douce\nComme la mousse des bois\n\nLa petite biche est aux abois\nDans le bois, se cache le loup\nOuh, ouh, ouh, ouh\nMais le brave chevalier passa\nIl prit la biche dans ses bras\nLa, la, la, la\n\nLa petite biche\nCe sera toi, si tu veux\nLe loup, on s'en fiche\nContre lui, nous serons deux\nUne chanson douce\nPour tous les petits enfants\nUne chanson douce\nQue me chantait ma maman\n\nOh le joli conte que voilà\nLa biche, en femme, se changea\nLa, la, la, la\nEt dans les bras du beau chevalier\nBelle princesse elle est restée\nÀ tout jamais\n\nUne chanson douce\nQue me chantait ma maman\nEn suçant mon pouce\nJ'écoutais en m'endormant\nCette chanson douce\nJe veux la chanter aussi\nPour toi, oh ma douce\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie\nJusqu'à la fin de ma vie`
+            },
+        ];
+
+        const audio = document.getElementById('audio-element');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const progressBar = document.getElementById('progress-bar');
+        const counterDisplay = document.getElementById('like-counter');
+        const likeSvg = document.getElementById('like-svg');
+        let currentIndex = parseInt(localStorage.getItem('dizzeur_index')) || 0;
+
+        onSnapshot(likeRef, (snap) => { if (snap.exists()) counterDisplay.innerText = snap.data().count; });
+        onSnapshot(trackStatsRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                playlist.forEach(track => {
+                    const el = document.getElementById(`count-${track.id}`);
+                    if (el) el.innerText = `${data[track.id] || 0} écoutes`;
+                });
+            }
+        });
+
+        window.handleLikeClick = async () => {
+            if (!localStorage.getItem('liked_douce_acoustique')) {
+                await updateDoc(likeRef, { count: increment(1) });
+                localStorage.setItem('liked_douce_acoustique', 'true');
+                likeSvg.style.fill = "#bc13fe";
+            }
+        };
+        if (localStorage.getItem('liked_douce_acoustique')) likeSvg.style.fill = "#bc13fe";
+
+        window.loadTrack = (index) => {
+            currentIndex = index;
+            const track = playlist[index];
+            localStorage.setItem('dizzeur_index', currentIndex);
+            document.getElementById('current-title').innerText = track.title;
+            document.getElementById('current-artist-album').innerText = "Hanaé - " + track.album;
+            
+            // --- GESTION AUTORADIO / LOCKSCREEN ---
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title,
+                    artist: "Hanaé",
+                    album: track.album,
+                    artwork: [
+                        { src: 'https://lh3.googleusercontent.com/d/1grK15czX1o1HMMGGdBLpxy26xWrgBaz4', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+            }
+
+            audio.src = track.url;
+            iconPlay.style.display="block"; iconPause.style.display="none";
+        };
+
+        window.playTrack = async (index) => {
+            const track = playlist[index];
+            try { await updateDoc(trackStatsRef, { [track.id]: increment(1) }); } catch(e) {}
+            if (currentIndex !== index) window.loadTrack(index);
+            audio.play().then(() => { 
+                iconPlay.style.display="none"; iconPause.style.display="block"; 
+            });
+        };
+
+        window.togglePlay = () => { 
+            if (audio.paused) { 
+                if (audio.currentTime === 0) {
+                    const track = playlist[currentIndex];
+                    updateDoc(trackStatsRef, { [track.id]: increment(1) }).catch(e => {});
+                }
+                audio.play(); iconPlay.style.display="none"; iconPause.style.display="block";
+            } else { 
+                audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none";
+            }
+        };
+
+        window.nextTrack = () => {
+            if (currentIndex < playlist.length - 1) window.playTrack(currentIndex + 1);
+            else window.playTrack(0); // Boucle au début
+        };
+
+        window.prevTrack = () => {
+            if (currentIndex > 0) window.playTrack(currentIndex - 1);
+            else window.playTrack(playlist.length - 1); // Va au dernier morceau
+        };
+
+        // --- COMMANDES VOLANT & AUTORADIO ---
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('pause', () => window.togglePlay());
+            navigator.mediaSession.setActionHandler('previoustrack', () => window.prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => window.nextTrack());
+        }
+
+        window.toggleLyrics = () => {
+            const overlay = document.getElementById('lyrics-overlay');
+            if (overlay.style.display === 'block') overlay.style.display = 'none';
+            else { 
+                document.getElementById('lyrics-content').innerText = playlist[currentIndex].lyrics; 
+                document.getElementById('lyrics-title').innerText = playlist[currentIndex].title; 
+                overlay.style.display = 'block'; 
+            }
+        };
+
+        window.handleShare = () => { if (navigator.share) navigator.share({ title: 'TreeFlow Music', url: window.location.href }); };
+
+        const listDiv = document.getElementById('track-list');
+        playlist.forEach((track, index) => {
+            listDiv.innerHTML += `<div class="track"><div class="track-info-text" onclick="playTrack(${index})"><h3>${track.title}</h3><p>Hanaé <span class="play-count" id="count-${track.id}">0 écoutes</span></p></div><a href="${track.url}" download class="download-btn"><svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></a></div>`;
+        });
+
+        audio.ontimeupdate = () => { if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100; };
+        progressBar.oninput = () => { audio.currentTime = (progressBar.value / 100) * audio.duration; };
+        audio.onended = () => window.nextTrack();
+
+        // --- ANTI-VEILLE (WAKE LOCK) ---
+        let wakeLock = null;
+        const requestWakeLock = async () => {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) { console.log("Wake Lock error:", err.message); }
+        };
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') requestWakeLock();
+        });
+
+        window.addEventListener('load', () => { 
+            window.loadTrack(currentIndex);
+            requestWakeLock();
+        });
+    </script>
+</body>
+</html>
