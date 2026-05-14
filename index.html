@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hanaé - TreeFlow Music</title>
+    <style>
+        :root { --violet: #cc00ff; --rose: #ff00cc; --noir: #000; }
+        body { background-color: var(--noir); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        
+        .top-banner { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; transition: filter 1s; }
+        .header { padding: 15px 20px 5px; }
+        h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
+        
+                /* Style discret pour le badge APK */
+
+        .apk-badge-container { padding: 0 20px; margin-bottom: 15px; }
+
+        .btn-apk-mini {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            background: rgba(204, 0, 255, 0.1);
+
+            border: 1px solid rgba(204, 0, 255, 0.3);
+
+            border-radius: 20px;
+
+            padding: 5px 12px;
+
+            text-decoration: none;
+
+            color: #ccc;
+
+            font-size: 0.75rem;
+
+            font-weight: 600;
+
+            transition: all 0.2s;
+
+        }
+
+        .btn-apk-mini:active { transform: scale(0.95); background: rgba(204, 0, 255, 0.2); }
+
+        .apk-icon-mini { width: 14px; height: 14px; fill: var(--violet); }
+
+
+
+        .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
+        
+        
+        .actions { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-top: 10px; }
+        .btn-like { background: rgba(30,0,50,0.9); border: 2px solid var(--violet); border-radius: 25px; padding: 10px 22px; color: var(--violet); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-like.liked { background: var(--rose); border-color: var(--rose); color: white; box-shadow: 0 0 15px var(--rose); }
+        
+        .player-controls { display: flex; align-items: center; gap: 15px; }
+        .btn-control { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .btn-play-main { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--rose)); border: none; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+        .btn-play-main.playing::before { content: 'II'; font-weight: bold; }
+        .btn-play-main:not(.playing)::before { content: '▶'; margin-left: 4px; }
+
+        section { padding: 30px 20px 10px; position: relative; }
+        h2 { color: var(--violet); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 15px; opacity: 0.8; }
+        
+        .track { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin-bottom: 10px; padding: 15px; border-radius: 12px; border: 2px solid transparent; transition: all 0.3s; cursor: pointer; }
+        .track.active { background: rgba(255, 0, 204, 0.12); border-color: var(--rose); }
+        .track-num { color: var(--violet); width: 30px; font-weight: 900; }
+        .track-name { flex: 1; font-weight: 500; }
+        .track-stats { font-size: 0.7rem; opacity: 0.5; color: var(--rose); margin-top: 2px; }
+
+        .album-scroll-container { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
+        .album-card { flex: 0 0 170px; text-decoration: none; color: inherit; display: block; }
+        .cover { width: 170px; height: 170px; border-radius: 18px; background-image: url('https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI'); background-size: cover; display: flex; justify-content: flex-end; align-items: flex-end; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .mini-play { background: var(--violet); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; }
+
+        .is-waiting .top-banner { filter: blur(8px) brightness(0.7); }
+        .is-waiting .track, .is-waiting .album-card { filter: blur(5px); opacity: 0.5; pointer-events: none; }
+        
+        .lock-overlay { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95); border: 2px solid var(--violet); padding: 12px 25px;
+            border-radius: 25px; color: var(--violet); font-weight: bold; font-size: 0.75rem; z-index: 10;
+            text-align: center; white-space: nowrap; box-shadow: 0 0 20px rgba(204, 0, 255, 0.3);
+        }
+        .is-waiting .lock-overlay { display: block; }
+
+        .comment-box { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .comment-input, .comment-pseudo { width: 100%; background: #222; border: 1px solid #444; border-radius: 8px; color: white; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
+        .comment-btn { background: var(--violet); border: none; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .comment-btn:disabled { background: #333; }
+        #comments-list { margin-top: 20px; max-height: 300px; overflow-y: auto; }
+        .comment-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--violet); }
+    </style>
+</head>
+<body class="is-waiting">
+
+    <img src="https://lh3.googleusercontent.com/d/14Okj_dpj2lA_mTE1x-1Tbsh3nFgwrkyc" class="top-banner">
+    <div class="header"><h1>Hanaé</h1></div>
+
+    <div class="apk-badge-container">
+
+        <a href="https://github.com/djsteph974/treeflow/releases/download/v1.7/TreeFlow.Music.v1.7.apk" class="btn-apk-mini">
+
+            <svg class="apk-icon-mini" viewBox="0 0 24 24"><path d="M17,1H7A2,2 0 0,0 5,3V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V3A2,2 0 0,0 17,1M17,19H7V5H17V19M16,13H13V8H11V13H8L12,17L16,13Z" /></svg>
+
+            App Android (v1.7)
+
+        </a>
+
+    </div>
+
+    <div class="actions">
+        <div class="btn-like" id="btnLike">❤️ <span id="likeCount">...</span></div>
+        <div class="player-controls">
+            <button class="btn-control" onclick="prevTrack()">⏮</button>
+            <button class="btn-play-main" id="mainPlayBtn" onclick="togglePlay()"></button>
+            <button class="btn-control" onclick="nextTrack()">⏭</button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <section>
+        <h2>LES 3 PLUS ÉCOUTÉS RÉCEMMENT</h2>
+        <div class="lock-overlay">ÉVÉNEMENT À VENIR LE 31 MAI</div>
+        <div id="track-list"></div>
+    </section>
+
+    <section>
+        <h2>Discographie</h2>
+        <div class="lock-overlay">BIENTÔT DISPONIBLE</div>
+        <div class="album-scroll-container">
+            <a href="#" id="album-link-1" class="album-card"><div class="cover"><div class="mini-play">▶</div></div><span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce</span></a>
+            <a href="#" id="album-link-2" class="album-card"><div class="cover"><div class="mini-play">▶</div></div><span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce (Instru)</span></a>
+			<a href="#" id="album-link-3" class="album-card">
+        <div class="cover" style="background-image: url('https://lh3.googleusercontent.com/d/1grK15czX1o1HMMGGdBLpxy26xWrgBaz4');">
+            <div class="mini-play">▶</div>
+        </div>
+        <span style="font-weight:bold; margin-top:10px; display:block;">Une Chanson Douce - Version Acoustique - EP</span>
+    </a>
+        </div>
+    </section>
+
+    <section>
+        <h2>Livre d'or</h2>
+        <div class="comment-box">
+            <input type="text" id="pseudo" class="comment-pseudo" placeholder="Livre d'or verrouillé" readonly>
+            <textarea id="comment" class="comment-input" placeholder="Revenez le 31 mai pour laisser un message." rows="3" readonly></textarea>
+            <button class="comment-btn" id="sendComment" disabled>Indisponible</button>
+            <div id="comments-list"></div>
+        </div>
+    </section>
+
+    <script type="module">
+        // --- IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-messaging.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
+            authDomain: "treeflow-music.firebaseapp.com",
+            projectId: "treeflow-music",
+            storageBucket: "treeflow-music.firebasestorage.app",
+            messagingSenderId: "330986852150",
+            appId: "1:330986852150:web:d57958930fa75b9504ad97"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const messaging = getMessaging(app);
+        
+        const DATE_CIBLE = new Date('2026-05-14T00:00:00').getTime();
+        const estDisponible = () => Date.now() >= DATE_CIBLE;
+
+        const audio = document.getElementById('audioPlayer');
+        const mainBtn = document.getElementById('mainPlayBtn');
+        const listContainer = document.getElementById('track-list');
+
+        let allTracks = [
+            { id: 'bonne_fete', title: 'Bonne Fête Maman', url: 'https://archive.org/download/04-la-grace-de-la-fleur/01%20-%20HANAE%20-%20BONNE%20FETE%20MAMAN.mp3', dbRef: "track_stats_douce", plays: 0 },
+            { id: 'chanson_douce', title: 'Une Chanson Douce', url: 'https://archive.org/download/04-la-grace-de-la-fleur/03%20-%20HANAE%20-%20UNE%20CHANSON%20DOUCE.mp3', dbRef: "track_stats_douce", plays: 0 },
+            { id: 'grace_fleur', title: 'La Grâce de la Fleur', url: 'https://archive.org/download/04-la-grace-de-la-fleur/04%20-%20LA%20GRACE%20DE%20LA%20FLEUR.mp3', dbRef: "track_stats_douce", plays: 0 },
+            { id: 'maman_je_taime', title: 'Maman Je t\'aime', url: 'https://archive.org/download/04-la-grace-de-la-fleur/02%20-%20HANAE%20-%20MAMAN%20JE%20T%20AIME.mp3', dbRef: "track_stats_douce", plays: 0 },
+            { id: 'bonne_fete_instru', title: 'Bonne Fête Maman(Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/01%20HANAE%20-%20BONNE%20FETE%20MAMAN%20%28Version%20Instru%29.mp3', dbRef: "track_stats_douce_instru", plays: 0 },
+            { id: 'chanson_douce_instru', title: 'Une Chanson Douce (Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/03%20HANAE%20-%20UNE%20CHANSON%20DOUCE%20%28Version%20Instru%29.mp3', dbRef: "track_stats_douce_instru", plays: 0 },
+            { id: 'grace_fleur_instru', title: 'La Grâce de la Fleur(Instru)', url: 'https://archive.org/download/04-la-grace-de-la-fleur-version-instru/04%20LA%20GRACE%20DE%20LA%20FLEUR%20%28Version%20Instru%29.mp3', dbRef: "track_stats_douce_instru", plays: 0 },
+			{ id: 'chanson_douce_acoustique', title: 'Une Chanson Douce (Acoustic)', url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/01%20Une%20Chanson%20Douce%20Version%20Acoustique%20EP.mp3', dbRef: "track_stats_douce_acoustique", plays: 0 },
+            { id: 'chanson_douce_acoustique_instru', title: 'Une Chanson Douce (Acoustic Instru)', url: 'https://archive.org/download/02-une-chanson-douce-version-acoustique-ep/02%20Une%20Chanson%20Douce%20Version%20Acoustique%20Instrumentale%20EP.mp3', dbRef: "track_stats_douce_acoustique", plays: 0 }
+        ];
+
+        let currentTrackPlaying = null;
+        let top3List = [];
+
+        const renderTop3 = () => {
+            top3List = [...allTracks].sort((a, b) => b.plays - a.plays).slice(0, 3);
+            listContainer.innerHTML = "";
+            top3List.forEach((t, i) => {
+                const isActive = (currentTrackPlaying && currentTrackPlaying.id === t.id && currentTrackPlaying.dbRef === t.dbRef && !audio.paused);
+                listContainer.innerHTML += `
+                    <div class="track ${isActive ? 'active' : ''}" onclick="jouerTrack('${t.id}', '${t.dbRef}')">
+                        <span class="track-num">${i+1}</span>
+                        <div class="track-name">
+                            ${t.title}
+                            <div class="track-stats">${t.plays} écoutes</div>
+                        </div>
+                    </div>`;
+            });
+
+            if(estDisponible()){
+                document.body.classList.remove('is-waiting');
+                const p = document.getElementById('pseudo');
+                const c = document.getElementById('comment');
+                const b = document.getElementById('sendComment');
+                p.readOnly = false; p.placeholder = "Ton pseudo";
+                c.readOnly = false; c.placeholder = "Laisse un petit mot pour Hanaé...";
+                b.disabled = false; b.innerText = "Poster le message";
+                document.getElementById('album-link-1').href = "album_hanaé.html";
+                document.getElementById('album-link-2').href = "album_hanaé_instru.html";
+				document.getElementById('album-link-3').href = "EP_hanae_une_chanson_douce_acoustic_version.html";
+            }
+        };
+
+        const syncStats = () => {
+            onSnapshot(doc(db, "stats", "track_stats_douce"), (snap) => {
+                if(snap.exists()){
+                    const data = snap.data();
+                    allTracks.filter(t => t.dbRef === "track_stats_douce").forEach(t => { t.plays = data[t.id] || 0; });
+                    renderTop3();
+                }
+            });
+            onSnapshot(doc(db, "stats", "track_stats_douce_instru"), (snap) => {
+                if(snap.exists()){
+                    const data = snap.data();
+                    allTracks.filter(t => t.dbRef === "track_stats_douce_instru").forEach(t => { t.plays = data[t.id] || 0; });
+                    renderTop3();
+                }
+            });
+			onSnapshot(doc(db, "stats", "track_stats_douce_acoustique"), (snap) => {
+                if(snap.exists()){
+                    const data = snap.data();
+                    allTracks.filter(t => t.dbRef === "track_stats_douce_acoustique").forEach(t => { t.plays = data[t.id] || 0; });
+                        renderTop3();
+                }
+            });
+        };
+
+        window.jouerTrack = async (id, dbRef) => {
+            if(!estDisponible()) return;
+            const track = allTracks.find(t => t.id === id && t.dbRef === dbRef);
+            if(!track) return;
+            currentTrackPlaying = track;
+            audio.src = track.url;
+            audio.play();
+            mainBtn.classList.add('playing');
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title, artist: 'Hanaé', album: 'Une Chanson Douce',
+                    artwork: [{ src: 'https://lh3.googleusercontent.com/d/1vsktKnp28H1JwhJeORR-UJsuaT-UItjI', sizes: '512x512', type: 'image/png' }]
+                });
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+            }
+            await updateDoc(doc(db, "stats", dbRef), { [id]: increment(1) });
+        };
+
+        window.togglePlay = () => {
+            if(!estDisponible()) return;
+            if (!currentTrackPlaying) { jouerTrack(top3List[0].id, top3List[0].dbRef); return; }
+            audio.paused ? audio.play() : audio.pause();
+            mainBtn.classList.toggle('playing', !audio.paused);
+            renderTop3();
+        };
+
+        window.nextTrack = () => {
+            if(!top3List.length) return;
+            const idx = top3List.findIndex(t => currentTrackPlaying && t.id === currentTrackPlaying.id && t.dbRef === currentTrackPlaying.dbRef);
+            const next = top3List[(idx + 1) % top3List.length];
+            jouerTrack(next.id, next.dbRef);
+        };
+
+        window.prevTrack = () => {
+            if(!top3List.length) return;
+            const idx = top3List.findIndex(t => currentTrackPlaying && t.id === currentTrackPlaying.id && t.dbRef === currentTrackPlaying.dbRef);
+            const prev = top3List[(idx - 1 + top3List.length) % top3List.length];
+            jouerTrack(prev.id, prev.dbRef);
+        };
+
+        audio.onended = () => nextTrack();
+
+        const btnLike = document.getElementById('btnLike');
+        btnLike.onclick = async () => {
+            if(!estDisponible() || localStorage.getItem('hanae_liked')) return;
+            await updateDoc(doc(db, "stats", "likes"), { count: increment(1) });
+            localStorage.setItem('hanae_liked', 'true');
+            btnLike.classList.add('liked');
+        };
+        onSnapshot(doc(db, "stats", "likes"), s => { if(s.exists()) document.getElementById('likeCount').innerText = s.data().count; });
+
+        document.getElementById('sendComment').onclick = async () => {
+            const p = document.getElementById('pseudo').value;
+            const t = document.getElementById('comment').value;
+            if(p && t) {
+                await addDoc(collection(db, "comments"), { pseudo: p, text: t, date: serverTimestamp() });
+                document.getElementById('comment').value = "";
+            }
+        };
+
+        onSnapshot(query(collection(db, "comments"), orderBy("date", "desc")), snap => {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = "";
+            snap.forEach(d => { list.innerHTML += `<div class="comment-item"><b>${d.data().pseudo}</b><br>${d.data().text}</div>`; });
+        });
+
+        // --- GESTION DES NOTIFICATIONS ---
+        async function demanderPermissionNotif() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Remplace par ta clé VAPID quand tu l'auras
+                    const token = await getToken(messaging, { vapidKey: 'BIUhj36IFGfQTl7Ifiv65s31oTQcWvePTkxExIf6fVZ-KC5o7tlV8DovqAPqYdbHDWm9_TxR6QVzGQQHL9OrRzQ' });
+                    if (token) console.log('Notifications prêtes');
+                }
+            } catch (error) { console.error('Erreur notification:', error); }
+        }
+
+        document.addEventListener('click', () => {
+            if (Notification.permission === 'default') demanderPermissionNotif();
+        }, { once: true });
+
+        syncStats();
+    </script>
+</body>
+</html>
