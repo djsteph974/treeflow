@@ -177,12 +177,13 @@
         const db = getFirestore(app);
 
         async function verifierCode() {
-            const codeSaisi = document.getElementById('code-secret').value;
-            const erreur = document.getElementById('message-erreur');
+async function verifierCode() {
+    const codeSaisi = document.getElementById('code-secret').value;
+    const erreur = document.getElementById('message-erreur');
 
-            try {
-                const docRef = doc(db, "configuration", "clip_prive");
-                const docSnap = await getDoc(docRef);
+    try {
+        const docRef = doc(db, "configuration", "clip_prive");
+        const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const codeCorrect = docSnap.data().mot_de_passe;
@@ -193,25 +194,24 @@
                         // 1. On fait disparaître la boîte de connexion
                         document.getElementById('ecran-connexion').style.display = 'none';
                         
-                        // 2. IMPORTANT : On injecte le code de la vidéo SEULEMENT MAINTENANT
-                        // Remplace LIEN_DE_TON_DRIVE par ton vrai lien iframe Google Drive
+                        // 2. On injecte ton lien Google Drive sous forme d'iframe
                         const lienDrive = "https://drive.google.com/file/d/1Rk_FX1qg5jaqCm3UWtV9DEbJMtwbLKc8/preview"; 
                         
                         document.getElementById('emplacement-iframe').innerHTML = `
                             <iframe src="${lienDrive}" width="100%" height="100%" allow="autoplay" frameborder="0" allowfullscreen></iframe>
                         `;
                         
-                        // 3. On affiche la zone vidéo
-                        document.getElementById('zone-video').style.style.display = 'block';
+                        // 3. On affiche la zone vidéo (la correction est ici)
+                        document.getElementById('zone-video').style.display = 'block';
                     } else {
                         erreur.style.display = "block";
                         document.getElementById('code-secret').value = "";
                     }
                 }
-            } catch (error) {
-                console.error("Erreur :", error);
-            }
-        }
+    } catch (error) {
+        console.error("Erreur :", error);
+    }
+}
 
         document.getElementById('btn-valider').addEventListener('click', verifierCode);
     </script>
