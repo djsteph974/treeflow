@@ -91,7 +91,7 @@
             text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
         }
 
-        /* Zone du lecteur vidéo (cachée au début) */
+        /* Zone du lecteur vidéo */
         #zone-video {
             display: none;
             max-width: 850px;
@@ -114,6 +114,12 @@
             border: 2px solid var(--rose);
             box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
             margin-bottom: 40px;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .btn-retour { 
@@ -152,8 +158,8 @@
         <h1>🍿 Bon visionnage !</h1>
         <p style="color: #a0a0a5; font-size: 0.9rem; margin-bottom: 30px;">Merci de garder ce contenu privé.</p>
 
-        <div class="video-container" id="emplacement-iframe">
-        </div>
+        <div class="video-container" id="emplacement-video">
+            </div>
 
         <br>
         <a href="index.html" class="btn-retour">← Retour au site</a>
@@ -188,13 +194,19 @@
 
                     if (codeSaisi === codeCorrect) {
                         erreur.style.display = "none";
-                        
                         document.getElementById('ecran-connexion').style.display = 'none';
                         
-                        const lienDrive = "https://drive.google.com/file/d/1Rk_FX1qg5jaqCm3UWtV9DEbJMtwbLKc8/preview"; 
+                        // Utilisation du flux direct Google Drive pour contourner le blocage d'écran noir
+                        const idVideo = "1Rk_FX1qg5jaqCm3UWtV9DEbJMtwbLKc8";
+                        const fluxDirect = `https://docs.google.com/uc?export=download&id=${idVideo}`;
                         
-                        document.getElementById('emplacement-iframe').innerHTML = `
-                            <iframe src="${lienDrive}" width="100%" height="100%" allow="autoplay" frameborder="0" allowfullscreen></iframe>
+                        // On injecte un vrai lecteur vidéo HTML5 avec contrôles, sans l'iframe de partage
+                        // "controlsList='nodownload'" empêche d'avoir le bouton télécharger sur le lecteur
+                        document.getElementById('emplacement-video').innerHTML = `
+                            <video controls controlsList="nodownload" oncontextmenu="return false;">
+                                <source src="${fluxDirect}" type="video/mp4">
+                                Votre navigateur ne supporte pas la lecture de cette vidéo.
+                            </video>
                         `;
                         
                         document.getElementById('zone-video').style.display = 'block';
