@@ -64,7 +64,7 @@
             outline: none;
         }
 
-        button { 
+        button, .btn-whatsapp { 
             width: 90%;
             padding: 12px; 
             background: linear-gradient(45deg, var(--violet), var(--rose)); 
@@ -75,10 +75,19 @@
             font-weight: bold; 
             font-size: 1rem;
             transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
         }
 
-        button:hover {
+        button:hover, .btn-whatsapp:hover {
             transform: scale(1.03);
+        }
+
+        .btn-whatsapp {
+            background: #25D366; /* Vert WhatsApp original */
+            margin-top: 15px;
+            font-size: 0.9rem;
         }
 
         .erreur { 
@@ -119,12 +128,10 @@
             display: block;
         }
 
-        /* Bloque les clics sur l'iframe uniquement quand cette classe est activée */
         .bloque-clics {
             pointer-events: none;
         }
 
-        /* Bouton de contrôle personnalisé avec texte centré */
         .btn-controle {
             background: linear-gradient(45deg, var(--violet), var(--rose));
             color: var(--texte);
@@ -169,11 +176,18 @@
 
     <div class="box" id="ecran-connexion">
         <h2>🎬 CLIP EXCLUSIF</h2>
-        <p>Entrez le code secret pour accéder à la vidéo d'Hanaé.</p>
+        <p id="statut-chargement">Vérification de votre accès en cours...</p>
         
-        <input type="password" id="code-secret" placeholder="Mot de passe secret">
-        <br>
-        <button id="btn-valider">DÉVERROUILLER LE CLIP</button>
+        <div id="champs-connexion" style="display: none;">
+            <input type="password" id="code-secret" placeholder="Mot de passe secret">
+            <br>
+            <button id="btn-valider">DÉVERROUILLER LE CLIP</button>
+            
+            <a href="https://wa.me/33621210112?text=Bonjour,%20je%20souhaite%20obtenir%20le%20mot%20de%20passe%20pour%20le%20clip%20exclusif%20!" 
+               target="_blank" class="btn-whatsapp">
+               💬 DEMANDER LE CODE SUR WHATSAPP
+            </a>
+        </div>
         
         <p id="message-erreur" class="erreur">❌ Code secret incorrect !</p>
     </div>
@@ -193,7 +207,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -208,7 +222,40 @@
         const db = getFirestore(app);
 
         let player;
+        let userIP = "";
         const idVideo = "uu4Cz_SEcEg";
+
+        // Lancement au chargement du script : récupération de l'IP
+        async function obtenirIPEtVerifier() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                userIP = data.ip.replace(/\./g, '_'); // Remplace les points pour Firebase
+                
+                // Vérifier si cette IP existe déjà dans une collection "utilisateurs_autorises"
+                const ipRef = doc(db, "utilisateurs_autorises", userIP);
+                const ipSnap = await getDoc(ipRef);
+
+                // Récupérer le vrai mot de passe maître pour le comparer en tâche de fond
+                const docRef = doc(db, "configuration", "clip_prive");
+                const docSnap = await getDoc(docRef);
+                const codeCorrect = docSnap.exists() ? docSnap.data().mot_de_passe : null;
+
+                if (ipSnap.exists() && codeCorrect && ipSnap.data().mot_de_passe === codeCorrect) {
+                    // L'IP a déjà validé le bon code dans le passé -> Accès direct immédiat
+                    afficherVideo();
+                } else {
+                    // IP inconnue ou code obsolète -> On montre le formulaire et le bouton WhatsApp
+                    document.getElementById('statut-chargement').innerText = "Entrez le code secret pour accéder à la vidéo d'Hanaé.";
+                    document.getElementById('champs-connexion').style.display = "block";
+                }
+            } catch (error) {
+                console.error("Erreur de vérification IP :", error);
+                // En cas de panne de l'API d'IP, on bascule normalement sur le mode manuel standard
+                document.getElementById('statut-chargement').innerText = "Entrez le code secret pour accéder à la vidéo d'Hanaé.";
+                document.getElementById('champs-connexion').style.display = "block";
+            }
+        }
 
         async function verifierCode() {
             const codeSaisi = document.getElementById('code-secret').value;
@@ -223,25 +270,16 @@
 
                     if (codeSaisi === codeCorrect) {
                         erreur.style.display = "none";
-                        document.getElementById('ecran-connexion').style.display = 'none';
-                        document.getElementById('zone-video').style.display = 'block';
                         
-                        player = new YT.Player('player', {
-                            height: '100%',
-                            width: '100%',
-                            videoId: idVideo,
-                            playerVars: {
-                                'controls': 0,
-                                'modestbranding': 1,
-                                'rel': 0,
-                                'showinfo': 0,
-                                'iv_load_policy': 3,
-                                'fs': 0
-                            },
-                            events: {
-                                'onStateChange': onPlayerStateChange
-                            }
-                        });
+                        // Si l'IP a pu être récupérée, on la sauvegarde avec le code validé dans Firebase
+                        if (userIP) {
+                            await setDoc(doc(db, "utilisateurs_autorises", userIP), {
+                                mot_de_passe: codeSaisi,
+                                date_validation: new Date().toISOString()
+                            });
+                        }
+
+                        afficherVideo();
                     } else {
                         erreur.innerText = "❌ Code secret incorrect !";
                         erreur.style.display = "block";
@@ -255,21 +293,41 @@
             }
         }
 
-        // Met à jour le bouton et gère intelligemment la protection anti-clic YouTube
+        function afficherVideo() {
+            document.getElementById('ecran-connexion').style.display = 'none';
+            document.getElementById('zone-video').style.display = 'block';
+            
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: idVideo,
+                playerVars: {
+                    'controls': 0,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'iv_load_policy': 3,
+                    'fs': 0
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play-pause');
             const iframe = document.getElementById('player');
             
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerHTML = "PAUSE";
-                if (iframe) iframe.classList.add('bloque-clics'); // Protège la vidéo quand elle tourne
+                if (iframe) iframe.classList.add('bloque-clics');
             } else {
                 btn.innerHTML = "LECTURE";
-                if (iframe) iframe.classList.remove('bloque-clics'); // Libère l'accès pour que le navigateur valide le clic
+                if (iframe) iframe.classList.remove('bloque-clics');
             }
         }
 
-        // Action instantanée au clic
         document.getElementById('btn-play-pause').addEventListener('click', () => {
             if (player && player.getPlayerState) {
                 const etat = player.getPlayerState();
@@ -282,6 +340,9 @@
         });
 
         document.getElementById('btn-valider').addEventListener('click', verifierCode);
+        
+        // Lancer la détection d'IP dès l'ouverture de la page
+        obtenirIPEtVerifier();
     </script>
 
 </body>
