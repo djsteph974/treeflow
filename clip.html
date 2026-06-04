@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TreeFlow Music - Accès Privé Sécurisé</title>
     <style>
         :root {
@@ -18,31 +18,36 @@
             color: var(--texte); 
             font-family: 'Poppins', sans-serif; 
             text-align: center; 
-            padding: 40px 20px;
+            padding: 20px;
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        /* Boîte de connexion */
         .box { 
             max-width: 400px; 
-            margin: 10% auto 0 auto; 
             background: var(--boite); 
-            padding: 40px 30px; 
+            padding: 30px 20px; 
             border-radius: 20px; 
             border: 2px solid var(--violet);
             box-shadow: 0 0 25px rgba(138, 43, 226, 0.35);
+            margin-bottom: 20px;
         }
 
         h2 {
             color: var(--texte);
             margin-bottom: 5px;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             letter-spacing: 1px;
+            margin-top: 10px;
         }
 
         p {
             color: #a0a0a5;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 25px;
         }
         
@@ -57,12 +62,6 @@
             text-align: center; 
             font-size: 1rem;
             outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: var(--rose);
-            box-shadow: 0 0 12px rgba(255, 0, 127, 0.5);
         }
 
         button { 
@@ -75,12 +74,11 @@
             cursor: pointer; 
             font-weight: bold; 
             font-size: 1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+            transform: scale(1.03);
         }
 
         .erreur { 
@@ -89,38 +87,74 @@
             margin-top: 20px; 
             font-weight: bold; 
             font-size: 0.9rem;
-            text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
         }
 
-        /* Zone du lecteur vidéo */
         #zone-video {
             display: none;
-            max-width: 850px;
-            margin: 20px auto 0 auto;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 5px;
-            background: linear-gradient(45deg, #ffffff, var(--rose));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            width: 100%;
+            max-width: 640px;
+            margin-top: 10px;
         }
 
         .video-container { 
-            aspect-ratio: 16/9; 
-            background: #000000; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            border: 2px solid var(--rose);
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
-            margin-bottom: 40px;
+            width: 100%;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            background: #000000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--violet);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+            margin-bottom: 15px;
         }
 
-        video {
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            border: 0;
+            display: block;
+        }
+
+        /* Vitre totale pour bloquer les clics sur YouTube */
+        .vitre-totale {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 10;
+        }
+
+        /* Bouton de contrôle personnalisé avec texte centré */
+        .btn-controle {
+            background: linear-gradient(45deg, var(--violet), var(--rose));
+            color: var(--texte);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            min-width: 150px;
+            margin-left: auto;
+            margin-right: auto;
+            gap: 0;
+            transition: background 0.3s;
+        }
+
+        .btn-controle:hover {
+             background: linear-gradient(45deg, var(--rose), var(--violet));
         }
 
         .btn-retour { 
@@ -128,19 +162,14 @@
             text-decoration: none; 
             font-weight: bold; 
             border: 2px solid var(--violet);
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             background: rgba(138, 43, 226, 0.05);
-            transition: all 0.3s ease;
             display: inline-block;
-        }
-
-        .btn-retour:hover {
-            background: var(--violet);
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
-            transform: translateY(-2px);
+            margin-top: 10px;
         }
     </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
@@ -150,19 +179,22 @@
         
         <input type="password" id="code-secret" placeholder="Mot de passe secret">
         <br>
-        <button id="btn-valider">Déverrouiller le clip</button>
+        <button id="btn-valider">DÉVERROUILLER LE CLIP</button>
         
         <p id="message-erreur" class="erreur">❌ Code secret incorrect !</p>
     </div>
 
     <div id="zone-video">
-        <h1>🍿 Bon visionnage !</h1>
-        <p style="color: #a0a0a5; font-size: 0.9rem; margin-bottom: 30px;">Merci de garder ce contenu privé.</p>
+        <p style="color: #a0a0a5; font-size: 0.85rem; margin-bottom: 20px;">Merci de garder ce contenu privé.</p>
 
-        <div class="video-container" id="emplacement-video">
-            </div>
+        <div class="video-container">
+            <div class="vitre-totale"></div>
+            <div id="player"></div>
+        </div>
 
+        <button id="btn-play-pause" class="btn-controle">LECTURE</button>
         <br>
+
         <a href="index.html" class="btn-retour">← Retour au site</a>
     </div>
 
@@ -170,6 +202,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Vos véritables identifiants Firebase synchronisés
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
             authDomain: "treeflow-music.firebaseapp.com",
@@ -181,6 +214,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        let player;
+        const idVideo = "uu4Cz_SEcEg";
 
         async function verifierCode() {
             const codeSaisi = document.getElementById('code-secret').value;
@@ -196,30 +232,59 @@
                     if (codeSaisi === codeCorrect) {
                         erreur.style.display = "none";
                         document.getElementById('ecran-connexion').style.display = 'none';
-                        
-                        // Utilisation du flux direct Google Drive pour contourner le blocage d'écran noir
-                        const idVideo = "1Rk_FX1qg5jaqCm3UWtV9DEbJMtwbLKc8";
-                        const fluxDirect = `https://docs.google.com/uc?export=download&id=${idVideo}`;
-                        
-                        // On injecte un vrai lecteur vidéo HTML5 avec contrôles, sans l'iframe de partage
-                        // "controlsList='nodownload'" empêche d'avoir le bouton télécharger sur le lecteur
-                        document.getElementById('emplacement-video').innerHTML = `
-                            <video controls controlsList="nodownload" oncontextmenu="return false;">
-                                <source src="${fluxDirect}" type="video/mp4">
-                                Votre navigateur ne supporte pas la lecture de cette vidéo.
-                            </video>
-                        `;
-                        
                         document.getElementById('zone-video').style.display = 'block';
+                        
+                        // Création du lecteur YouTube via l'API sans contrôles d'origine
+                        player = new YT.Player('player', {
+                            height: '100%',
+                            width: '100%',
+                            videoId: idVideo,
+                            playerVars: {
+                                'controls': 0,          // Masque la barre du bas d'origine
+                                'modestbranding': 1,    // Masque au maximum le logo
+                                'rel': 0,               // Supprime les suggestions de vidéos à la fin
+                                'showinfo': 0,
+                                'iv_load_policy': 3,
+                                'fs': 0                 // Désactive le plein écran d'origine
+                            },
+                            events: {
+                                'onStateChange': onPlayerStateChange
+                            }
+                        });
                     } else {
+                        erreur.innerText = "❌ Code secret incorrect !";
                         erreur.style.display = "block";
                         document.getElementById('code-secret').value = "";
                     }
                 }
             } catch (error) {
-                console.error("Erreur :", error);
+                console.error("Erreur Firebase :", error);
+                erreur.innerText = "❌ Erreur de connexion à la base de données.";
+                erreur.style.display = "block";
             }
         }
+
+        // Met à jour le texte du bouton en fonction de l'état de la vidéo
+        function onPlayerStateChange(event) {
+            const btn = document.getElementById('btn-play-pause');
+            if (event.data == YT.PlayerState.PLAYING) {
+                btn.innerHTML = "PAUSE";
+            } else {
+                btn.innerHTML = "LECTURE";
+            }
+        }
+
+        // Gère l'action du bouton unique Lecture / Pause
+        document.getElementById('btn-play-pause').addEventListener('click', () => {
+            if (player && player.getPlayerState) {
+                const etat = player.getPlayerState();
+                if (etat == YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            }
+        });
 
         document.getElementById('btn-valider').addEventListener('click', verifierCode);
     </script>
