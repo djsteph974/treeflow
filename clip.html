@@ -119,15 +119,9 @@
             display: block;
         }
 
-        /* Vitre totale pour bloquer les clics sur YouTube */
-        .vitre-totale {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 10;
+        /* Bloque les clics sur l'iframe uniquement quand cette classe est activée */
+        .bloque-clics {
+            pointer-events: none;
         }
 
         /* Bouton de contrôle personnalisé avec texte centré */
@@ -188,7 +182,6 @@
         <p style="color: #a0a0a5; font-size: 0.85rem; margin-bottom: 20px;">Merci de garder ce contenu privé.</p>
 
         <div class="video-container">
-            <div class="vitre-totale"></div>
             <div id="player"></div>
         </div>
 
@@ -202,7 +195,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Vos véritables identifiants Firebase synchronisés
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
             authDomain: "treeflow-music.firebaseapp.com",
@@ -234,18 +226,17 @@
                         document.getElementById('ecran-connexion').style.display = 'none';
                         document.getElementById('zone-video').style.display = 'block';
                         
-                        // Création du lecteur YouTube via l'API sans contrôles d'origine
                         player = new YT.Player('player', {
                             height: '100%',
                             width: '100%',
                             videoId: idVideo,
                             playerVars: {
-                                'controls': 0,          // Masque la barre du bas d'origine
-                                'modestbranding': 1,    // Masque au maximum le logo
-                                'rel': 0,               // Supprime les suggestions de vidéos à la fin
+                                'controls': 0,
+                                'modestbranding': 1,
+                                'rel': 0,
                                 'showinfo': 0,
                                 'iv_load_policy': 3,
-                                'fs': 0                 // Désactive le plein écran d'origine
+                                'fs': 0
                             },
                             events: {
                                 'onStateChange': onPlayerStateChange
@@ -264,17 +255,21 @@
             }
         }
 
-        // Met à jour le texte du bouton en fonction de l'état de la vidéo
+        // Met à jour le bouton et gère intelligemment la protection anti-clic YouTube
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play-pause');
+            const iframe = document.getElementById('player');
+            
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerHTML = "PAUSE";
+                if (iframe) iframe.classList.add('bloque-clics'); // Protège la vidéo quand elle tourne
             } else {
                 btn.innerHTML = "LECTURE";
+                if (iframe) iframe.classList.remove('bloque-clics'); // Libère l'accès pour que le navigateur valide le clic
             }
         }
 
-        // Gère l'action du bouton unique Lecture / Pause
+        // Action instantanée au clic
         document.getElementById('btn-play-pause').addEventListener('click', () => {
             if (player && player.getPlayerState) {
                 const etat = player.getPlayerState();
