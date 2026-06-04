@@ -420,19 +420,16 @@
 
 
         window.playClip = () => {
-
+            // Incrémente le compteur de vues sur Firebase
             updateDoc(clipStatsRef, { views: increment(1) }).catch(e => {});
-
-            audio.pause(); iconPlay.style.display="block"; iconPause.style.display="none";
-
-            const overlay = document.getElementById('video-overlay');
-
-            const container = document.getElementById('video-container');
-
-            container.innerHTML = `<iframe src="https://github.com/djsteph974/treeflow/blob/main/clip.html" width="100%" height="100%" frameborder="0" allow="autoplay"></iframe>`;
-
-            overlay.style.display = 'flex';
-
+            
+            // Coupe la musique en cours pour éviter les superpositions de son
+            audio.pause(); 
+            iconPlay.style.display = "block"; 
+            iconPause.style.display = "none";
+            
+            // Redirige directement vers ta page clip.html
+            window.location.href = "clip.html";
         };
 
 
