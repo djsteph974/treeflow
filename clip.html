@@ -28,13 +28,14 @@
         }
 
         .box { 
+            width: 100%;
             max-width: 400px; 
             background: var(--boite); 
             padding: 30px 20px; 
             border-radius: 20px; 
             border: 2px solid var(--violet);
             box-shadow: 0 0 25px rgba(138, 43, 226, 0.35);
-            margin-bottom: 20px;
+            box-sizing: border-box;
         }
 
         h2 {
@@ -85,7 +86,7 @@
         }
 
         .btn-whatsapp {
-            background: #25D366; /* Vert WhatsApp original */
+            background: #25D366;
             margin-top: 15px;
             font-size: 0.9rem;
         }
@@ -108,7 +109,7 @@
         .video-container { 
             width: 100%;
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%; 
             height: 0;
             background: #000000;
             border-radius: 12px;
@@ -128,7 +129,19 @@
             display: block;
         }
 
-        .bloque-clics {
+        /* Calque de protection absolue sur l'iframe de YouTube */
+        .vitre-totale {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 9999;
+            pointer-events: auto; 
+        }
+
+        .vitre-totale.passante {
             pointer-events: none;
         }
 
@@ -196,6 +209,7 @@
         <p style="color: #a0a0a5; font-size: 0.85rem; margin-bottom: 20px;">Merci de garder ce contenu privé.</p>
 
         <div class="video-container">
+            <div id="calque-protecteur" class="vitre-totale"></div>
             <div id="player"></div>
         </div>
 
@@ -207,7 +221,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -225,33 +239,27 @@
         let userIP = "";
         const idVideo = "uu4Cz_SEcEg";
 
-        // Lancement au chargement du script : récupération de l'IP
+        function genererNouveauCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
         async function obtenirIPEtVerifier() {
             try {
                 const response = await fetch('https://api.ipify.org?format=json');
                 const data = await response.json();
-                userIP = data.ip.replace(/\./g, '_'); // Remplace les points pour Firebase
+                userIP = data.ip.replace(/\./g, '_'); 
                 
-                // Vérifier si cette IP existe déjà dans une collection "utilisateurs_autorises"
                 const ipRef = doc(db, "utilisateurs_autorises", userIP);
                 const ipSnap = await getDoc(ipRef);
-
-                // Récupérer le vrai mot de passe maître pour le comparer en tâche de fond
-                const docRef = doc(db, "configuration", "clip_prive");
-                const docSnap = await getDoc(docRef);
-                const codeCorrect = docSnap.exists() ? docSnap.data().mot_de_passe : null;
-
-                if (ipSnap.exists() && codeCorrect && ipSnap.data().mot_de_passe === codeCorrect) {
-                    // L'IP a déjà validé le bon code dans le passé -> Accès direct immédiat
+                
+                if (ipSnap.exists()) {
                     afficherVideo();
                 } else {
-                    // IP inconnue ou code obsolète -> On montre le formulaire et le bouton WhatsApp
                     document.getElementById('statut-chargement').innerText = "Entrez le code secret pour accéder à la vidéo d'Hanaé.";
                     document.getElementById('champs-connexion').style.display = "block";
                 }
             } catch (error) {
                 console.error("Erreur de vérification IP :", error);
-                // En cas de panne de l'API d'IP, on bascule normalement sur le mode manuel standard
                 document.getElementById('statut-chargement').innerText = "Entrez le code secret pour accéder à la vidéo d'Hanaé.";
                 document.getElementById('champs-connexion').style.display = "block";
             }
@@ -271,13 +279,17 @@
                     if (codeSaisi === codeCorrect) {
                         erreur.style.display = "none";
                         
-                        // Si l'IP a pu être récupérée, on la sauvegarde avec le code validé dans Firebase
                         if (userIP) {
                             await setDoc(doc(db, "utilisateurs_autorises", userIP), {
-                                mot_de_passe: codeSaisi,
+                                autorise: true,
                                 date_validation: new Date().toISOString()
                             });
                         }
+
+                        const nouveauCode = genererNouveauCode();
+                        await updateDoc(docRef, {
+                            mot_de_passe: nouveauCode
+                        });
 
                         afficherVideo();
                     } else {
@@ -307,7 +319,8 @@
                     'rel': 0,
                     'showinfo': 0,
                     'iv_load_policy': 3,
-                    'fs': 0
+                    'fs': 0,
+                    'disablekb': 1
                 },
                 events: {
                     'onStateChange': onPlayerStateChange
@@ -317,33 +330,33 @@
 
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play-pause');
-            const iframe = document.getElementById('player');
-            
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.innerHTML = "PAUSE";
-                if (iframe) iframe.classList.add('bloque-clics');
             } else {
                 btn.innerHTML = "LECTURE";
-                if (iframe) iframe.classList.remove('bloque-clics');
             }
         }
 
         document.getElementById('btn-play-pause').addEventListener('click', () => {
             if (player && player.getPlayerState) {
+                const calque = document.getElementById('calque-protecteur');
                 const etat = player.getPlayerState();
+
                 if (etat == YT.PlayerState.PLAYING) {
                     player.pauseVideo();
                 } else {
+                    if (calque) calque.classList.add('passante');
                     player.playVideo();
+                    setTimeout(() => {
+                        if (calque) calque.classList.remove('passante');
+                    }, 150);
                 }
             }
         });
 
         document.getElementById('btn-valider').addEventListener('click', verifierCode);
         
-        // Lancer la détection d'IP dès l'ouverture de la page
         obtenirIPEtVerifier();
     </script>
-
 </body>
 </html>
