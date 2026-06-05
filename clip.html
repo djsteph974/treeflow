@@ -191,13 +191,15 @@
             
             <div id="player"></div>
         </div>
-
+        
+        <p id="compteur-vues" style="color: #a0a0a5; font-size: 0.9rem; font-weight: bold; margin-top: -10px;"></p>
+        
         <a href="index.html" class="btn-retour">← Retour au site</a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, getDoc,  increment, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8K0QUGr3xUSra2q_feHGrAjt0qAfrKY8",
@@ -210,7 +212,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
+        const docRef = doc(db, "configuration", "clip_prive");
+        
         let player;
         let userIP = "";
         const idVideo = "uu4Cz_SEcEg";
@@ -246,7 +249,6 @@
             const erreur = document.getElementById('message-erreur');
 
             try {
-                const docRef = doc(db, "configuration", "clip_prive");
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
@@ -281,7 +283,24 @@
             }
         }
 
-        function afficherVideo() {
+        async function afficherVideo() {
+            try {
+                // 1. Ajoute +1 au compteur sur Firebase
+                await updateDoc(docRef, {
+                    nombre_de_vues: increment(1)
+                });
+
+                // 2. Récupère la nouvelle valeur mise à jour
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists() && docSnap.data().nombre_de_vues !== undefined) {
+                    const vues = docSnap.data().nombre_de_vues;
+                    // 3. Affiche le texte sous le lecteur
+                    document.getElementById('compteur-vues').innerText = `👁️ ${vues} ${vues > 1 ? 'vues' : 'vue'}`;
+                }
+            } catch (e) {
+                console.error("Erreur compteur :", e);
+            }
+
             document.getElementById('ecran-connexion').style.display = 'none';
             document.getElementById('zone-video').style.display = 'block';
             
@@ -296,7 +315,8 @@
                     'showinfo': 0,
                     'iv_load_policy': 3,
                     'fs': 0,
-                    'disablekb': 1
+                    'disablekb': 1,
+                    'origin': window.location.origin
                 }
             });
         }
